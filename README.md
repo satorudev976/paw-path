@@ -4,29 +4,28 @@
 
 PawPath（パウパス）は、英語の「Paw（肉球）」＋「Path（道・ルート）」を組み合わせた造語です。
 
-## 📱 主な機能
 
-- 🐾 **散歩の記録** - GPS追跡でルートと距離を自動記録
-- 👨‍👩‍👧‍👦 **家族共有** - 招待リンクで簡単に家族を作成
-- 📊 **統計表示** - 週間・月間の散歩データを可視化
-- 🗺️ **マップ表示** - 過去の散歩ルートを地図上で確認
-- 💳 **サブスクリプション** - トライアルで３０日間　月額/年額プランで無制限利用可能
+## ローカル開発
 
-## 🏗️ 技術スタック
+```
+npx expo start
+```
 
-### フロントエンド
+## Dev Client ビルド
 
-- **React Native** - モバイルアプリフレームワーク
-- **Expo SDK 52** - 開発環境・ビルドツール
-- **TypeScript** - 型安全な開発
-- **React Navigation** - 画面遷移管理
+```
+npx eas build --profile development
+```
 
-### バックエンド・サービス
+## テスト配布
 
-- **Firebase Authentication** - ユーザー認証（Google / Apple）
-- **Firebase Firestore** - NoSQLデータベース
-- **Firebase Hosting** - 静的Webページホスティング
-- **RevenueCat** - サブスクリプション管理
-- **Google Maps API** - 地図表示
-- **Cloud Function** - 家族招待や未認証ユーザーの対応
+```
+npx eas build --profile preview
+```
 
+## ストア提出
+
+```
+npx eas build --profile production
+npx eas submit --profile production
+```
