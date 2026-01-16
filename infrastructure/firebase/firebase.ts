@@ -1,4 +1,4 @@
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { Platform } from "react-native";
 import Constants from "expo-constants";
@@ -16,6 +16,9 @@ const firebaseConfig = {
       : firebaseExtra.appId.android,
 };
 
-const app = initializeApp(firebaseConfig);
+export const app =
+  getApps().length === 0
+    ? initializeApp(firebaseConfig)
+    : getApps()[0]
 
 export const db = getFirestore(app);
