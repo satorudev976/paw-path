@@ -1,11 +1,9 @@
-import { Timestamp } from 'firebase/firestore';
-
 export interface Family {
   familyId: string
   ownerId: string
-  createdAt: Timestamp
+  createdAt: Date
   planStatus: 'active' | 'readOnly'
-  memberCount: number
-  trialEndAt: Timestamp
+  memberLimit: number
+  trialEndAt: Date
   trialUsed: boolean
 }
