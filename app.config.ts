@@ -120,6 +120,13 @@ export default ({ config }: ConfigContext): ExpoConfig => {
           },
       },
 
+      googleAuth: {
+        iosClientId:
+          process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+        webClientId:
+          process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+      },
+
       eas: {
         projectId: "d8217194-1634-43f6-9fa9-1be90cb3530f",
       },
