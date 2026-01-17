@@ -1,5 +1,4 @@
 export interface Family {
-  familyId: string
   ownerId: string
   createdAt: Date
   planStatus: 'active' | 'readOnly'
