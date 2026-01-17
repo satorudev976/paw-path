@@ -5,10 +5,41 @@ import {
     User,
     signOut as firebaseSignOut,
   } from 'firebase/auth';
+import { useGoogleAuthRequest } from '@/hooks/google-auth-request'
+import * as AppleAuthentication from 'expo-apple-authentication'
+
+const [_, googleResponse, promptGoogleSignIn] =
+  useGoogleAuthRequest();
+
+export const signInWithGoogle= async (): Promise<User> => {
+  const result = await promptGoogleSignIn()
+  if (result.type !== 'success') {
+    throw new Error('Google Sign-In cancelled')
+  }
+  const user = await signInWithGoogleByToken(result.params.id_token)
+  return user
+}
+
+export const signInWithApple = async (): Promise<User> => {
+    const appleResult = await AppleAuthentication.signInAsync({
+      requestedScopes: [
+        AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+        AppleAuthentication.AppleAuthenticationScope.EMAIL,
+      ],
+    });
+
+    if (!appleResult.identityToken) {
+      throw new Error('APPLE_ID_TOKEN_MISSING');
+    }
+
+    const user = await signInWithAppleByToken(appleResult.identityToken);
+    return user
+  };
+
 /**
  * Googleログイン処理
  */
-export const signInWithGoogle = async (idToken: string): Promise<User> => {
+const signInWithGoogleByToken = async (idToken: string): Promise<User> => {
   const credential = GoogleAuthProvider.credential(idToken);
   const userCredential = await signInWithCredential(auth, credential);
   return userCredential.user;
@@ -17,7 +48,7 @@ export const signInWithGoogle = async (idToken: string): Promise<User> => {
 /**
  * Appleログイン処理
  */
-export const signInWithApple = async (identityToken: string): Promise<User> => {
+const signInWithAppleByToken = async (identityToken: string): Promise<User> => {
   const provider = new OAuthProvider('apple.com');
   const credential = provider.credential({ idToken: identityToken });
   const userCredential = await signInWithCredential(auth, credential);
