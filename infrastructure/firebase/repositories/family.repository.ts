@@ -1,32 +1,39 @@
 import { db } from '@/infrastructure/firebase/firebase';
+import { Family } from '@/domain/entities/family';
 import {
-    collection,
-    doc,
-    setDoc,
-  } from 'firebase/firestore';
-
-const familiesRef = collection(db, 'families');
+  doc,
+  getDoc,
+  setDoc,
+  Timestamp,
+} from 'firebase/firestore';
 
 export const familyRepository = {
 
-  async create(ownerId: string): Promise<string> {
-    const ref = doc(familiesRef);
-    const familyId = ref.id;
+  async create(family: Family): Promise<void> {
+    const ref = doc(db, 'families', family.id);
 
-    const now = new Date();
-    const trialEndAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7日後
-    
     await setDoc(ref, {
-      familyId: familyId,
-      ownerId: ownerId,
-      createdAt: now,
-      planStatus: 'active',
-      memberLimit: 5,
-      trialEndAt: trialEndAt,
-      trialUsed: true,
+      createdAt: Timestamp.fromDate(family.createdAt),
+      planStatus: family.planStatus,
+      trialEndAt: Timestamp.fromDate(family.trialEndAt),
+      trialUsed: family.trialUsed,
     });
-    
-    return familyId;
-  }
+  },
 
-}
+  async findById(familyId: string): Promise<Family | null> {
+    const ref = doc(db, 'families', familyId);
+    const snap = await getDoc(ref);
+
+    if (!snap.exists()) return null;
+
+    const data = snap.data();
+
+    return {
+      id: snap.id,
+      createdAt: data.createdAt.toDate(),
+      planStatus: data.planStatus,
+      trialEndAt: data.trialEndAt.toDate(),
+      trialUsed: data.trialUsed,
+    };
+  },
+};
