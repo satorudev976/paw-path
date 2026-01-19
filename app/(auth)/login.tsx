@@ -10,10 +10,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useGoogleAuthRequest } from '@/hooks/google-auth-request'
-import { loginService } from '@/service/auth/login.service';
+import { loginService, userType } from '@/service/auth/login.service';
 import * as AppleAuthentication from 'expo-apple-authentication'
-export default function LoginScreen() {
+import { User } from '@/domain/entities/user';
+import { useRouter } from 'expo-router';
 
+export default function LoginScreen() {
+  const router = useRouter();
   const bounceAnim = useState(new Animated.Value(0))[0];
   const [_, googleResponse, promptGoogleSignIn] = useGoogleAuthRequest();
 
@@ -39,10 +42,12 @@ export default function LoginScreen() {
     if (googleResponse?.type !== 'success') return
     const idToken = googleResponse.authentication?.idToken
     if (idToken) {
-      loginService.login({
+      const user = await loginService.login({
         provider: 'google',
         idToken: idToken
       });
+
+      await handleSingIn(user);
     }
   }
 
@@ -55,11 +60,29 @@ export default function LoginScreen() {
     })
     const idToken = result.identityToken
       if (idToken) {
-        loginService.login({
+        const user = await loginService.login({
           provider: 'apple',
           idToken: idToken
         });
+
+        await handleSingIn(user);
       }
+  }
+
+  const handleSingIn = async (user: userType) => {
+    
+    if (user.type === 'authenticated') {
+      // 既存ユーザーがログアウトして、再度ログイン
+      router.replace('/(tabs)');
+    } else {
+      // 新規ユーザー
+      router.replace({
+        pathname: '/(onboarding)/nickname',
+        params: {
+          authUid: user.authUid,
+        },
+      });
+    }
   }
 
 
