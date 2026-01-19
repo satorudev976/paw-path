@@ -1,29 +1,29 @@
 // contexts/AuthContext.tsx
 import { createContext, useContext, useEffect, useState } from 'react';
-import { onAuthStateChanged, User } from 'firebase/auth';
+import { onAuthStateChanged, User as AuthUser } from 'firebase/auth';
 import { auth } from '@/infrastructure/firebase/auth.firebase';
 
 type AuthContextValue = {
-  firebaseUser: User | null;
+  authUser: AuthUser | null;
   initializing: boolean;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => {
-      setFirebaseUser(u);
+      setAuthUser(u);
       setInitializing(false);
     });
     return unsub;
   }, []);
 
   return (
-    <AuthContext.Provider value={{ firebaseUser, initializing }}>
+    <AuthContext.Provider value={{ authUser: authUser, initializing }}>
       {children}
     </AuthContext.Provider>
   );
