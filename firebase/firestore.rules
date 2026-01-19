@@ -1,0 +1,110 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /* =====================
+       共通ヘルパー
+    ======================*/
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function userDoc(uid) {
+      return get(/databases/$(database)/documents/users/$(uid));
+    }
+
+    function familyIdOf(uid) {
+      return userDoc(uid).data.familyId;
+    }
+
+    function familyDoc(uid) {
+      return get(/databases/$(database)/documents/families/$(familyIdOf(uid)));
+    }
+
+    function isOwner(uid) {
+      return userDoc(uid).data.role == 'owner';
+    }
+
+    function isWritableFamily(uid) {
+      return familyDoc(uid).data.planStatus == 'active';
+    }
+
+    function isSameFamily(uid, familyId) {
+      return familyIdOf(uid) == familyId;
+    }
+
+    /* =====================
+       users
+    ======================*/
+    match /users/{uid} {
+      allow read: if isSignedIn() && request.auth.uid == uid;
+
+      allow create: if isSignedIn() && request.auth.uid == uid;
+
+      allow update: if isSignedIn()
+        && request.auth.uid == uid
+        // familyId / role は変更不可
+        && request.resource.data.familyId == resource.data.familyId
+        && request.resource.data.role == resource.data.role;
+
+      allow delete: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    /* =====================
+       families
+    ======================*/
+    match /families/{familyId} {
+
+      allow read: if isSignedIn()
+        && isSameFamily(request.auth.uid, familyId);
+
+      // 新規作成（初回ユーザのみ想定）
+      allow create: if isSignedIn();
+
+      // 更新は「その family のオーナーのみ」
+      allow update: if isSignedIn()
+        && isSameFamily(request.auth.uid, familyId)
+        && userDoc(request.auth.uid).data.role == 'owner';
+
+      allow delete: if false;
+    }
+
+    /* =====================
+       walks (subcollection)
+    ======================*/
+    match /families/{familyId}/walks/{walkId} {
+
+      allow read: if isSignedIn()
+        && isSameFamily(request.auth.uid, familyId);
+
+      allow create: if isSignedIn()
+        && isSameFamily(request.auth.uid, familyId)
+        && isWritableFamily(request.auth.uid)
+        && request.resource.data.recordedBy == request.auth.uid;
+
+      allow delete: if isSignedIn()
+        && request.auth.uid == resource.data.recordedBy;
+
+      allow update: if false;
+    }
+
+    /* =====================
+       invites
+    ======================*/
+    match /invites/{token} {
+
+      // 招待リンク検証用（Hosting からも読む）
+      allow read: if true;
+
+      allow create: if isSignedIn()
+        && isOwner(request.auth.uid);
+
+      // usedCount 更新など（Cloud Functions or App）
+      allow update: if isSignedIn()
+        && resource.data.isActive == true;
+
+      allow delete: if false;
+    }
+  }
+}
