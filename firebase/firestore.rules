@@ -1,10 +1,7 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    /* =====================
-       共通ヘルパー
-    ======================*/
 
     function isSignedIn() {
       return request.auth != null;
@@ -14,96 +11,88 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/users/$(uid));
     }
 
-    function familyIdOf(uid) {
-      return userDoc(uid).data.familyId;
+    function familyDoc(familyId) {
+      return get(/databases/$(database)/documents/families/$(familyId));
     }
 
-    function familyDoc(uid) {
-      return get(/databases/$(database)/documents/families/$(familyIdOf(uid)));
+    function isOwner() {
+      return isSignedIn()
+        && userDoc(request.auth.uid).data.role == 'owner';
     }
 
-    function isOwner(uid) {
-      return userDoc(uid).data.role == 'owner';
+    function belongsToFamily(familyId) {
+      return isSignedIn()
+        && userDoc(request.auth.uid).data.familyId == familyId;
     }
 
-    function isWritableFamily(uid) {
-      return familyDoc(uid).data.planStatus == 'active';
+    function familyIsWritable(familyId) {
+      return familyDoc(familyId).data.planStatus == 'active';
     }
-
-    function isSameFamily(uid, familyId) {
-      return familyIdOf(uid) == familyId;
-    }
-
-    /* =====================
-       users
-    ======================*/
     match /users/{uid} {
+
+      // 自分の user は読める
       allow read: if isSignedIn() && request.auth.uid == uid;
 
-      allow create: if isSignedIn() && request.auth.uid == uid;
+      // 作成（新規ログイン時）
+      allow create: if isSignedIn()
+        && request.auth.uid == uid;
 
+      // 更新（nickname など）
       allow update: if isSignedIn()
-        && request.auth.uid == uid
-        // familyId / role は変更不可
-        && request.resource.data.familyId == resource.data.familyId
-        && request.resource.data.role == resource.data.role;
+        && request.auth.uid == uid;
 
-      allow delete: if isSignedIn() && request.auth.uid == uid;
+      // 削除（アカウント削除）
+      allow delete: if isSignedIn()
+        && request.auth.uid == uid;
     }
-
-    /* =====================
-       families
-    ======================*/
     match /families/{familyId} {
 
-      allow read: if isSignedIn()
-        && isSameFamily(request.auth.uid, familyId);
+      // 家族メンバーは read 可
+      allow read: if belongsToFamily(familyId);
 
-      // 新規作成（初回ユーザのみ想定）
-      allow create: if isSignedIn();
+      // 作成（新規 owner のみ）
+      allow create: if isSignedIn()
+        && isOwner();
 
-      // 更新は「その family のオーナーのみ」
-      allow update: if isSignedIn()
-        && isSameFamily(request.auth.uid, familyId)
-        && userDoc(request.auth.uid).data.role == 'owner';
+      // 更新は owner のみ
+      allow update: if belongsToFamily(familyId)
+        && isOwner();
 
+      // 削除は原則禁止（事故防止）
       allow delete: if false;
     }
-
-    /* =====================
-       walks (subcollection)
-    ======================*/
     match /families/{familyId}/walks/{walkId} {
 
-      allow read: if isSignedIn()
-        && isSameFamily(request.auth.uid, familyId);
+      // 家族なら閲覧可（readOnly でも OK）
+      allow read: if belongsToFamily(familyId);
 
-      allow create: if isSignedIn()
-        && isSameFamily(request.auth.uid, familyId)
-        && isWritableFamily(request.auth.uid)
+      // 作成：家族 + 書き込み可能状態
+      allow create: if belongsToFamily(familyId)
+        && familyIsWritable(familyId)
         && request.resource.data.recordedBy == request.auth.uid;
 
-      allow delete: if isSignedIn()
-        && request.auth.uid == resource.data.recordedBy;
-
+      // 更新：禁止（immutable）
       allow update: if false;
+
+      // 削除：記録者のみ + writable
+      allow delete: if belongsToFamily(familyId)
+        && familyIsWritable(familyId)
+        && resource.data.recordedBy == request.auth.uid;
     }
+    match /invites/{inviteId} {
 
-    /* =====================
-       invites
-    ======================*/
-    match /invites/{token} {
+      // 家族オーナーのみ read
+      allow read: if isSignedIn()
+        && isOwner();
 
-      // 招待リンク検証用（Hosting からも読む）
-      allow read: if true;
-
+      // 作成：オーナーのみ（回数制限は Function）
       allow create: if isSignedIn()
-        && isOwner(request.auth.uid);
+        && isOwner();
 
-      // usedCount 更新など（Cloud Functions or App）
-      allow update: if isSignedIn()
-        && resource.data.isActive == true;
+      // 更新：Function のみ想定
+      allow update: if false;
 
+      // 削除：期限切れ cleanup 用（Function）
       allow delete: if false;
     }
   }
