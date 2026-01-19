@@ -1,6 +1,7 @@
 import { Timestamp } from 'firebase/firestore';
 
 export interface Walk {
+  familyId: string
   recordedBy: string
   startTime: Timestamp
   endTime: Timestamp
