@@ -9,10 +9,13 @@ import {
     View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
+import { useGoogleAuthRequest } from '@/hooks/google-auth-request'
+import { loginService } from '@/service/auth/login.service';
+import * as AppleAuthentication from 'expo-apple-authentication'
 export default function LoginScreen() {
 
   const bounceAnim = useState(new Animated.Value(0))[0];
+  const [_, googleResponse, promptGoogleSignIn] = useGoogleAuthRequest();
 
   useEffect(() => {
     // アイコンのバウンスアニメーション
@@ -32,9 +35,33 @@ export default function LoginScreen() {
     ).start();
   }, []);
 
-  const handleLogin = async (provider: 'google' | 'apple') => {
-    // TODO
-  };
+  const handleGoogleSingIn = async () => {
+    if (googleResponse?.type !== 'success') return
+    const idToken = googleResponse.authentication?.idToken
+    if (idToken) {
+      loginService.login({
+        provider: 'google',
+        idToken: idToken
+      });
+    }
+  }
+
+  const handleAppleSignIn = async () => {
+    const result = await AppleAuthentication.signInAsync({
+      requestedScopes: [
+        AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+        AppleAuthentication.AppleAuthenticationScope.EMAIL,
+      ],
+    })
+    const idToken = result.identityToken
+      if (idToken) {
+        loginService.login({
+          provider: 'apple',
+          idToken: idToken
+        });
+      }
+  }
+
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -66,7 +93,7 @@ export default function LoginScreen() {
             {/* Googleログイン */}
             <TouchableOpacity
               style={[styles.button, styles.googleButton]}
-              onPress={() => handleLogin('google')}
+              onPress={handleGoogleSingIn}
               //disabled={authLoading}
             >
               {/* {authLoading ? (
@@ -83,7 +110,7 @@ export default function LoginScreen() {
             {Platform.OS === 'ios' && (
               <TouchableOpacity
                 style={[styles.button, styles.appleButton]}
-                onPress={() => handleLogin('apple')}
+                onPress={handleAppleSignIn}
                 // disabled={authLoading}
               >
                 {/* {authLoading ? (
