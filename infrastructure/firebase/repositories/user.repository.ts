@@ -15,13 +15,14 @@ export const userRepository = {
 
     if (!snap.exists()) return null
 
-    const data = snap.data()
+    const user = snap.data()
 
     return {
       id: snap.id,
-      familyId: data.familyId,
-      role: data.role,
-      createdAt: data.createdAt.toDate()
+      familyId: user.familyId,
+      nickname: user.nickname,
+      role: user.role,
+      createdAt: user.createdAt.toDate()
     }
   },
 
@@ -30,6 +31,7 @@ export const userRepository = {
     tx.set(ref, {
       familyId: user.familyId,
       role: user.role,
+      nickname: user.nickname,
       createdAt: Timestamp.fromDate(user.createdAt)
     })
   }
