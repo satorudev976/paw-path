@@ -7,14 +7,21 @@ type idToken =
   | { provider: 'google'; idToken: string }
   | { provider: 'apple'; idToken: string }
 
+export type userType =
+  | { type: 'authenticated'; user: User }
+  | { type: 'guest'; authUid: string }
+
 export const loginService = {
-  async login(params: idToken): Promise<User | null> {
+  async login(params: idToken): Promise<userType> {
     const authUser =
       params.provider === 'google'
         ? await authRepository.signInWithGoogle(params.idToken)
         : await authRepository.signInWithApple(params.idToken)
 
     const user = await userRepository.findById(authUser.uid)
-    return user
+    
+    if (user) return { type: 'authenticated', user: user }
+
+    return { type: 'guest', authUid: authUser.uid }
   },
 }
