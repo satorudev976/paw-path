@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { setUpOwnerService } from '@/service/onborarding/setup-owner.service'
 /**
  * ニックネーム設定画面
  * 
@@ -21,7 +22,9 @@ export default function NicknameScreen() {
   const [nickname, setNickname] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async () => {
+  const { authUid } = useLocalSearchParams<{ authUid: string }>();
+
+  const handleSetUp = async () => {
     console.log('=== ニックネーム設定開始 ===');
 
     // バリデーション
@@ -38,6 +41,10 @@ export default function NicknameScreen() {
     setIsLoading(true);
     
     try {
+      await setUpOwnerService.setUp(
+        authUid,
+        nickname
+      )
       // 成功メッセージ
       Alert.alert(
         '参加完了！',
@@ -80,7 +87,7 @@ export default function NicknameScreen() {
 
         <TouchableOpacity
           style={[styles.button, isLoading && styles.buttonDisabled]}
-          onPress={handleSubmit}
+          onPress={handleSetUp}
           disabled={isLoading}
         >
           {isLoading ? (
