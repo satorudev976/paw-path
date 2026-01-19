@@ -127,6 +127,11 @@ export default ({ config }: ConfigContext): ExpoConfig => {
           process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
       },
 
+      revenuCat: {
+        entitlement: process.env.EXPO_PUBLIC_REVENUECAT_ENTITLEMENT,
+        iosKey: process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY
+      },
+
       eas: {
         projectId: "d8217194-1634-43f6-9fa9-1be90cb3530f",
       },
