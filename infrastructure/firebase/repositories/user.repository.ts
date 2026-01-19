@@ -2,10 +2,15 @@ import { db } from '@/infrastructure/firebase/firebase';
 import { User } from '@/domain/entities/user'
 import { Timestamp } from 'firebase/firestore';
 import {
-    doc,
-    getDoc,
-    Transaction,
-  } from 'firebase/firestore';
+  doc,
+  getDoc,
+  getDocs,
+  collection,
+  query,
+  where,
+  orderBy,
+  Transaction,
+} from 'firebase/firestore'
 
 export const userRepository = {
   
@@ -24,6 +29,28 @@ export const userRepository = {
       role: user.role,
       createdAt: user.createdAt.toDate()
     }
+  },
+
+  async findByFamilyId(familyId: string): Promise<User[]> {
+    const ref = collection(db, "users");
+    const q = query(
+      ref,
+      where("familyId", "==", familyId),
+      orderBy("createdAt", "asc")  // 作成日時の昇順（古い順）
+    );
+
+    const snapshot = await getDocs(q);
+
+    return snapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        familyId: data.familyId,
+        nickname: data.nickname,
+        role: data.role,
+        createdAt: data.createdAt.toDate(),
+      };
+    });
   },
 
   async create(tx: Transaction, user: User): Promise<void> {
