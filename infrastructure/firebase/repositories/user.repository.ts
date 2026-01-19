@@ -3,11 +3,11 @@ import { User } from '@/domain/entities/user'
 import { Timestamp } from 'firebase/firestore';
 import {
     doc,
-    setDoc,
     getDoc,
+    Transaction,
   } from 'firebase/firestore';
 
-export const UserRepository = {
+export const userRepository = {
   
   async findById(userId: string): Promise<User | null> {
     const ref = doc(db, "users", userId)
@@ -25,9 +25,9 @@ export const UserRepository = {
     }
   },
 
-  async create(user: User): Promise<void> {
+  async create(tx: Transaction, user: User): Promise<void> {
     const ref = doc(db, "users", user.id)
-    await setDoc(ref, {
+    tx.set(ref, {
       familyId: user.familyId,
       role: user.role,
       createdAt: Timestamp.fromDate(user.createdAt)

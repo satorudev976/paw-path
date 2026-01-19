@@ -3,16 +3,16 @@ import { Family } from '@/domain/entities/family';
 import {
   doc,
   getDoc,
-  setDoc,
   Timestamp,
+  Transaction,
 } from 'firebase/firestore';
 
 export const familyRepository = {
 
-  async create(family: Family): Promise<void> {
+  async create(tx: Transaction, family: Family): Promise<void> {
     const ref = doc(db, 'families', family.id);
 
-    await setDoc(ref, {
+    tx.set(ref, {
       createdAt: Timestamp.fromDate(family.createdAt),
       planStatus: family.planStatus,
       trialEndAt: Timestamp.fromDate(family.trialEndAt),
