@@ -3,6 +3,7 @@ import { Family } from '@/domain/entities/family';
 import {
   doc,
   getDoc,
+  updateDoc,
   Timestamp,
   Transaction,
 } from 'firebase/firestore';
@@ -34,6 +35,20 @@ export const familyRepository = {
       planStatus: data.planStatus,
       trialEndAt: data.trialEndAt.toDate(),
       trialUsed: data.trialUsed,
-    };
+    } as Family;
+  },
+
+  /**
+  * planStatus 更新（ownerのみ想定）
+  */
+  async updatePlanStatus(
+    familyId: string,
+    status: 'active' | 'readOnly'
+  ): Promise<void> {
+    const ref = doc(db, 'families', familyId)
+
+    await updateDoc(ref, {
+      planStatus: status,
+    })
   },
 };
