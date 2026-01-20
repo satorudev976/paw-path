@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { setUpOwnerService } from '@/service/onborarding/setup-owner.service'
+import { setUpOwnerService } from '@/services/onborarding/setup-owner.service'
 /**
  * ニックネーム設定画面
  * 

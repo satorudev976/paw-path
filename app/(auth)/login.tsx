@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useGoogleAuthRequest } from '@/hooks/google-auth-request'
-import { loginService, userType } from '@/service/auth/login.service';
+import { loginService, userType } from '@/services/auth/login.service';
 import * as AppleAuthentication from 'expo-apple-authentication'
 import { User } from '@/domain/entities/user';
 import { useRouter } from 'expo-router';
