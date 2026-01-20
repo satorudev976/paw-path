@@ -4,8 +4,8 @@ import { useUser } from '@/hooks/use-user';
 import { Redirect } from 'expo-router';
 
 export default function Index() {
-  const { firebaseUser } = useAuth();
-  const { user, isLoading } = useUser();
+  const { firebaseUser, isLoading } = useAuth();
+  const { user } = useUser();
 
   if (isLoading) return null;
 
