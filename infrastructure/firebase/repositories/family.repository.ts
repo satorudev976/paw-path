@@ -51,4 +51,15 @@ export const familyRepository = {
       planStatus: status,
     })
   },
+
+  /**
+     * trial 使用済みフラグを立てる
+     */
+  async markTrialUsed(familyId: string): Promise<void> {
+    const ref = doc(db, 'families', familyId)
+
+    await updateDoc(ref, {
+      trialUsed: true,
+    })
+  },
 };
