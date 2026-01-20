@@ -1,9 +1,9 @@
-// presentation/hooks/useGoogleAuthRequest.ts
 import * as Google from 'expo-auth-session/providers/google'
+import Constants from 'expo-constants'
 
 export const useGoogleAuthRequest = () =>
   Google.useAuthRequest({
-    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+    iosClientId: Constants.expoConfig?.extra?.googleAuth.iosClientId,
     // androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
-    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+    webClientId: Constants.expoConfig?.extra?.googleAuth.webClientId,
 })
