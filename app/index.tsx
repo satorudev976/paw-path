@@ -1,0 +1,21 @@
+// app/index.tsx
+import { useAuth } from '@/hooks/use-auth';
+import { useUser } from '@/hooks/use-user';
+import { Redirect } from 'expo-router';
+
+export default function Index() {
+  const { firebaseUser } = useAuth();
+  const { user, isLoading } = useUser();
+
+  if (isLoading) return null;
+
+  if (!firebaseUser) {
+    return <Redirect href="/(auth)/login" />;
+  }
+
+  if (!user) {
+    return <Redirect href="/(auth)/login" />;
+  }
+
+  return <Redirect href="/(tabs)" />;
+}
