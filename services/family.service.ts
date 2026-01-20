@@ -1,5 +1,4 @@
-// services/family.service.ts
-import { Family } from '@/domain/entities/family
+import { Family } from '@/domain/entities/family'
 import { familyRepository } from '@/infrastructure/firebase/repositories/family.repository'
   
 export const FamilyService = {
