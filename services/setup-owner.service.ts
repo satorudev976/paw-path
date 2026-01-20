@@ -36,9 +36,9 @@ export const setUpOwnerService = {
     }
   
     await runTransaction(db, async (tx) => {
-      await familyRepository.create(tx, family)
-      await userRepository.create(tx, newUser)
-    }
+      familyRepository.create(tx, family)
+      userRepository.create(tx, newUser)
+    })
   }
 
 }
