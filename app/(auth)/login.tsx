@@ -1,22 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import {
-    Animated,
-    Image,
-    Platform,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Animated,
+  Image,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useGoogleAuthRequest } from '@/hooks/google-auth-request'
 import { AuthService, userType } from '@/services/auth.service';
 import * as AppleAuthentication from 'expo-apple-authentication'
-import { User } from '@/domain/entities/user';
 import { useRouter } from 'expo-router';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { isLoading } = useAuth();
   const bounceAnim = useState(new Animated.Value(0))[0];
   const [_, googleResponse, promptGoogleSignIn] = useGoogleAuthRequest();
 
@@ -117,16 +119,16 @@ export default function LoginScreen() {
             <TouchableOpacity
               style={[styles.button, styles.googleButton]}
               onPress={handleGoogleSingIn}
-              //disabled={authLoading}
+              disabled={isLoading}
             >
-              {/* {authLoading ? (
+              {isLoading ? (
                 <ActivityIndicator color="#4285F4" />
               ) : (
                 <>
                   <Text style={styles.googleIcon}>G</Text>
                   <Text style={styles.googleButtonText}>Googleで続ける</Text>
                 </>
-              )} */}
+              )}
             </TouchableOpacity>
 
             {/* Appleログイン (iOSのみ) */}
@@ -134,16 +136,16 @@ export default function LoginScreen() {
               <TouchableOpacity
                 style={[styles.button, styles.appleButton]}
                 onPress={handleAppleSignIn}
-                // disabled={authLoading}
+                disabled={isLoading}
               >
-                {/* {authLoading ? (
+                {isLoading ? (
                   <ActivityIndicator color="#FFFFFF" />
                 ) : (
                   <>
                     <Text style={styles.appleIcon}></Text>
                     <Text style={styles.appleButtonText}>Appleで続ける</Text>
                   </>
-                )} */}
+                )}
               </TouchableOpacity>
             )}
           </View>
