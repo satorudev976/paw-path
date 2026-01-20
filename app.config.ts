@@ -18,6 +18,13 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
 
+    updates: {
+      url: "https://u.expo.dev/d8217194-1634-43f6-9fa9-1be90cb3530f"
+    },
+    runtimeVersion: {
+      policy: "appVersion"
+    },
+
     ios: {
       locales: {
         ja: {
