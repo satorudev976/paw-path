@@ -5,7 +5,7 @@ import React, {
   useCallback,
 } from 'react'
 
-import { useAuthContext } from './auth.context'
+import { useUser } from '@/hooks/use-user'
 import { FamilyService } from '@/services/family.service'
 import { SubscriptionService } from '@/services/subscription.service'
 
@@ -26,7 +26,7 @@ export const SubscriptionContext =
 export const SubscriptionProvider: React.FC<{
   children: React.ReactNode
 }> = ({ children }) => {
-  const { user } = useAuthContext()
+  const { user } = useUser()
 
   const [state, setState] = useState<SubscriptionState>({
     isLoading: true,

@@ -1,45 +1,37 @@
-import { createContext, useContext, useEffect, useState } from 'react';
-import { useAuth } from './auth.context';
+import { createContext, useContext, useState, useEffect } from 'react';
+import { UserService } from '@/services/user.service'
+import { useAuth } from '@/hooks/use-auth'
 import { User } from '@/domain/entities/user'
-import { userRepository } from '@/infrastructure/firebase/repositories/user.repository';
 
 type UserContextValue = {
-  user: User | null;
-  loading: boolean;
-};
-
-const UserContext = createContext<UserContextValue | undefined>(undefined);
-
-export function UserProvider({ children }: { children: React.ReactNode }) {
-  const { authUser: authUser } = useAuth();
-  const [user, setAppUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!authUser) {
-      setAppUser(null);
-      setLoading(false);
-      return;
-    }
-
-    const load = async () => {
-      const user = await userRepository.findById(authUser.uid)
-      setAppUser(user);
-      setLoading(false);
-    };
-
-    load();
-  }, [authUser]);
-
-  return (
-    <UserContext.Provider value={{ user: user, loading }}>
-      {children}
-    </UserContext.Provider>
-  );
+  user: User | null
+  isLoading: boolean
+  refresh: () => Promise<void>
 }
 
-export function useUser() {
-  const ctx = useContext(UserContext);
-  if (!ctx) throw new Error('useUser must be used inside UserProvider');
-  return ctx;
+export const UserContext = createContext<UserContextValue | null>(null)
+
+export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { firebaseUser } = useAuth()
+  const [user, setUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  const load = async () => {
+    if (!firebaseUser) return
+    setIsLoading(true)
+    const u = await UserService.get(firebaseUser.uid)
+    setUser(u)
+    setIsLoading(false)
+  }
+
+  useEffect(() => {
+    if (!firebaseUser) return
+    load()
+  }, [firebaseUser])
+
+  return (
+    <UserContext.Provider value={{ user, isLoading, refresh: load }}>
+      {children}
+    </UserContext.Provider>
+  )
 }
