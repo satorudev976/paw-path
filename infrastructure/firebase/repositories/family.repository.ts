@@ -38,9 +38,6 @@ export const familyRepository = {
     } as Family;
   },
 
-  /**
-  * planStatus 更新（ownerのみ想定）
-  */
   async updatePlanStatus(
     familyId: string,
     status: 'active' | 'readOnly'
@@ -52,14 +49,11 @@ export const familyRepository = {
     })
   },
 
-  /**
-     * trial 使用済みフラグを立てる
-     */
-  async markTrialUsed(familyId: string): Promise<void> {
+  async updateTrialUsed(familyId: string, trialUsed: boolean): Promise<void> {
     const ref = doc(db, 'families', familyId)
 
     await updateDoc(ref, {
-      trialUsed: true,
+      trialUsed: trialUsed,
     })
   },
 };
