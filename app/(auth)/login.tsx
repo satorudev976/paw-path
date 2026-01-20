@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useGoogleAuthRequest } from '@/hooks/google-auth-request'
-import { loginService, userType } from '@/services/auth/login.service';
+import { AuthService, userType } from '@/services/auth.service';
 import * as AppleAuthentication from 'expo-apple-authentication'
 import { User } from '@/domain/entities/user';
 import { useRouter } from 'expo-router';
@@ -42,7 +42,7 @@ export default function LoginScreen() {
     if (googleResponse?.type !== 'success') return
     const idToken = googleResponse.authentication?.idToken
     if (idToken) {
-      const user = await loginService.login({
+      const user = await AuthService.login({
         provider: 'google',
         idToken: idToken
       });
@@ -60,7 +60,7 @@ export default function LoginScreen() {
     })
     const idToken = result.identityToken
       if (idToken) {
-        const user = await loginService.login({
+        const user = await AuthService.login({
           provider: 'apple',
           idToken: idToken
         });

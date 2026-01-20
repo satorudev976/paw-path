@@ -11,7 +11,7 @@ export type userType =
   | { type: 'authenticated'; user: User }
   | { type: 'guest'; authUid: string }
 
-export const loginService = {
+export const AuthService = {
   async login(params: idToken): Promise<userType> {
     const authUser =
       params.provider === 'google'
