@@ -11,7 +11,7 @@ import {
   Linking,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { userRepository } from '@/infrastructure/firebase/repositories/user.repository';
+import { UserService } from '@/services/user.service';
 import { User } from '@/domain/entities/user';
 import { useUser } from '@/hooks/use-user';
 
@@ -25,17 +25,26 @@ export default function SettingsScreen() {
   // 🆕 画面にフォーカスが戻るたびにメンバーリストを再読み込み
   useFocusEffect(
     React.useCallback(() => {
-      console.log('設定画面にフォーカス - メンバー一覧を再読み込み');
-      setIsLoadingMembers(true);
-      try {
-        const users = await userRepository.findByFamilyId(user?.familyId);
-        setMembers(users);
-      } catch (error) {
-        console.error('メンバー一覧読み込みエラー:', error);
-      } finally {
-        setIsLoadingMembers(false);
-      }
-    }, [])
+      const loadMembers = async () => {
+        if (!user?.familyId) {
+          setIsLoadingMembers(false);
+          return;
+        }
+  
+        console.log('設定画面にフォーカス - メンバー一覧を再読み込み');
+        setIsLoadingMembers(true);
+        try {
+          const users = await UserService.getFamilyUsers(user.familyId);
+          setMembers(users);
+        } catch (error) {
+          console.error('メンバー一覧読み込みエラー:', error);
+        } finally {
+          setIsLoadingMembers(false);
+        }
+      };
+  
+      loadMembers();
+    }, [user?.familyId])
   );
 
   // ユーザー情報編集画面へ遷移
