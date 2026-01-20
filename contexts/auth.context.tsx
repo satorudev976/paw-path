@@ -1,36 +1,35 @@
-// contexts/AuthContext.tsx
-import { createContext, useContext, useEffect, useState } from 'react';
-import { onAuthStateChanged, User as AuthUser } from 'firebase/auth';
-import { auth } from '@/infrastructure/firebase/auth.firebase';
+import { createContext, useContext, useEffect, useState } from 'react'
+import { onAuthStateChanged } from 'firebase/auth'
+import { auth } from '@/infrastructure/firebase/auth.firebase'
 
-type AuthContextValue = {
-  authUser: AuthUser | null;
-  initializing: boolean;
-};
-
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
-
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
-  const [initializing, setInitializing] = useState(true);
-
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
-      setAuthUser(u);
-      setInitializing(false);
-    });
-    return unsub;
-  }, []);
-
-  return (
-    <AuthContext.Provider value={{ authUser: authUser, initializing }}>
-      {children}
-    </AuthContext.Provider>
-  );
+type AuthState = {
+  status: 'loading' | 'authenticated' | 'unauthenticated'
+  uid: string | null
 }
 
-export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used inside AuthProvider');
-  return ctx;
+export const AuthContext = createContext<AuthState | null>(null)
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [state, setState] = useState<AuthState>({
+    status: 'loading',
+    uid: null,
+  })
+
+  useEffect(() => {
+    return onAuthStateChanged(auth, user => {
+      if (!user) {
+        setState({ status: 'unauthenticated', uid: null })
+      } else {
+        setState({ status: 'authenticated', uid: user.uid })
+      }
+    })
+  }, [])
+
+  return <AuthContext.Provider value={state}>{children}</AuthContext.Provider>
+}
+
+export const useAuth = () => {
+  const ctx = useContext(AuthContext)
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider')
+  return ctx
 }
