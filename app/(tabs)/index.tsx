@@ -1,7 +1,7 @@
 import { useWalkRecording } from '@/contexts/walk-recording.context';
 import { StyleSheet, View } from 'react-native';
-import { IdleState } from './home/idel-state';
-import { RecordingState } from './home/recording-state';
+import { IdleState } from '../(home)/idel-state';
+import { RecordingState } from '../(home)/recording-state';
 
 export default function HomeScreen() {
   const { isRecording } = useWalkRecording();
