@@ -5,6 +5,8 @@ import {
   doc,
   getDoc,
   getDocs,
+  updateDoc,
+  deleteDoc,
   collection,
   query,
   where,
@@ -61,5 +63,20 @@ export const userRepository = {
       nickname: user.nickname,
       createdAt: Timestamp.fromDate(user.createdAt)
     })
-  }
+  },
+
+  async updateNickname(
+    uid: string,
+    nickname: string
+  ): Promise<void> {
+    const ref = doc(db, 'users', uid)
+
+    await updateDoc(ref, {
+      nickname,
+    })
+  },
+
+  async delete(uid: string): Promise<void> {
+    await deleteDoc(doc(db, 'users', uid))
+  },
 }
