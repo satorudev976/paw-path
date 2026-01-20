@@ -15,7 +15,7 @@ import { UserService } from '@/services/user.service';
 import { User } from '@/domain/entities/user';
 import { useUser } from '@/hooks/use-user';
 
-export default function SettingsScreen() {
+export default function FamilySettingsScreen() {
   const router = useRouter();
   const { user } = useUser();
   const [members, setMembers] = useState<Array<User>>([]);

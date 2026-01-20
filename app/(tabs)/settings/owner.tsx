@@ -22,7 +22,7 @@ import { User } from '@/domain/entities/user';
 
 const WEB_BASE_URL = 'https://paw-path-63154.web.app';
 
-export default function SettingsScreen() {
+export default function OwnwerSettingsScreen() {
   const router = useRouter();
   const { user } = useUser();
   const subscription = useSubscription()
