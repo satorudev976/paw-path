@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import RankingView from './ranking';
-import StatsView from './stats';
+import RankingView from './records/ranking';
+import StatsView from './records/stats';
 
 type Tab = 'stats' | 'ranking';
 
