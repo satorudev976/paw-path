@@ -48,7 +48,7 @@ export const SubscriptionProvider: React.FC<{
 
     const now = Date.now()
     const trialActive = family.trialEndAt.getTime() > now
-
+    // サブスクリプション契約をしているか、アプリ内お試し期間中か
     const active = hasEntitlement || trialActive
 
     setState({
