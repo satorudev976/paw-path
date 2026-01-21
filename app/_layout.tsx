@@ -4,8 +4,14 @@ import { SubscriptionProvider } from '@/contexts/subscription.context';
 import { UserProvider } from '@/contexts/user.context';
 import { WalkRecordingProvider } from '@/contexts/walk-recording.context';
 import { Slot } from 'expo-router';
+import { useEffect } from 'react'
+import { initRevenueCat } from '@/infrastructure/revenucat/revenuecat.client'
 
 export default function RootLayout() {
+  useEffect(() => {
+    initRevenueCat()
+  }, [])
+
   return (
     <AuthProvider>
       <UserProvider>

@@ -4,6 +4,7 @@ import {
   User as AuthUser,
 } from 'firebase/auth'
 import { auth } from '@/infrastructure/firebase/auth.firebase'
+import { SubscriptionService } from '@/services/subscription.service';
 
 type AuthContextValue = {
   authUser: AuthUser | null
@@ -17,10 +18,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    return onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       setAuthUser(user)
       setIsLoading(false)
+
+      if (user?.uid) {
+        SubscriptionService.purchasesLogIn(user?.uid)
+      } else {
+        SubscriptionService.purchasesLogOut()
+      }
     })
+
+    return unsubscribe
   }, [])
 
   return (

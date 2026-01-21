@@ -2,8 +2,12 @@ import Purchases from 'react-native-purchases'
 import Constants from 'expo-constants'
 
 export const SubscriptionService = {
-  async setup(userId: string) {
+  async purchasesLogIn(userId: string) {
     await Purchases.logIn(userId)
+  },
+
+  async purchasesLogOut() {
+    await Purchases.logOut()
   },
 
   async hasPremium(): Promise<boolean> {
