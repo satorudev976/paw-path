@@ -50,9 +50,8 @@ service cloud.firestore {
       // 家族メンバーは read 可
       allow read: if belongsToFamily(familyId);
 
-      // 作成（新規 owner のみ）
-      allow create: if isSignedIn()
-        && isOwner();
+      // 作成（新規のみ）
+      allow create: if isSignedIn();
 
       // 更新は owner のみ
       allow update: if belongsToFamily(familyId)

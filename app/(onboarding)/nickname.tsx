@@ -1,4 +1,4 @@
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
@@ -12,17 +12,17 @@ import {
   View,
 } from 'react-native';
 import { setUpOwnerService } from '@/services/setup-owner.service'
+import { useAuth } from '@/hooks/use-auth';
 /**
  * ニックネーム設定画面
  * 
  */
 export default function NicknameScreen() {
   const router = useRouter();
+  const { firebaseUser } = useAuth();
   
   const [nickname, setNickname] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
-  const { authUid } = useLocalSearchParams<{ authUid: string }>();
 
   const handleSetUp = async () => {
     console.log('=== ニックネーム設定開始 ===');
@@ -41,8 +41,12 @@ export default function NicknameScreen() {
     setIsLoading(true);
     
     try {
+      if (!firebaseUser) {
+        return;
+      }
+      
       await setUpOwnerService.setUp(
-        authUid,
+        firebaseUser?.uid,
         nickname
       )
       // 成功メッセージ
