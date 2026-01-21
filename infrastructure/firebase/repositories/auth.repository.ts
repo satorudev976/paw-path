@@ -11,15 +11,15 @@ import { auth } from '@/infrastructure/firebase/auth.firebase'
 export const authRepository = {
   async signInWithGoogle(idToken: string): Promise<AuthUser> {
     const credential = GoogleAuthProvider.credential(idToken)
-    const result = await signInWithCredential(auth, credential)
-    return result.user
+    const userCredential = await signInWithCredential(auth, credential)
+    return userCredential.user
   },
 
   async signInWithApple(idToken: string): Promise<AuthUser> {
     const provider = new OAuthProvider('apple.com')
     const credential = provider.credential({ idToken })
-    const result = await signInWithCredential(auth, credential)
-    return result.user
+    const userCredential = await signInWithCredential(auth, credential)
+    return userCredential.user
   },
 
   getCurrentAuthUser(): AuthUser | null {
