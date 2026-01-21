@@ -19,8 +19,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const load = async () => {
     if (!firebaseUser) return
     setIsLoading(true)
-    const u = await UserService.get(firebaseUser.uid)
-    setUser(u)
+    const user = await UserService.get(firebaseUser.uid)
+    setUser(user)
     setIsLoading(false)
   }
 
