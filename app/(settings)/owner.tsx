@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 // import { createInviteLink } from '../../src/services/inviteService';
-import { useSubscription } from '@/hooks/use-subscription';
+import { useAppAccess } from '@/hooks/use-app-access';
 import { useUser } from '@/hooks/use-user';
 import { UserService } from '@/services/user.service';
 import { User } from '@/domain/entities/user';
@@ -25,7 +25,7 @@ const WEB_BASE_URL = 'https://paw-path-63154.web.app';
 export default function OwnwerSettingsScreen() {
   const router = useRouter();
   const { user } = useUser();
-  const subscription = useSubscription()
+  const { isLoading, readonly, trialUse } = useAppAccess()
   
   const [members, setMembers] = useState<Array<User>>([]);
   const [isLoadingMembers, setIsLoadingMembers] = useState(false);
@@ -53,54 +53,9 @@ export default function OwnwerSettingsScreen() {
     }, [user?.familyId])
   );
 
-  const getSubscriptionDisplayName = (): string => {
-    if (subscription.isTrialActive) return 'トライアル中';
-    if (subscription.isActive) return 'プレミアムプラン';
-    return '閲覧専用モード';
-  }
-
 
   const handleShareCode = async () => {
 
-    // // 🆕 メンバー上限チェック
-    // if (members.length >= 5) {
-    //   Alert.alert(
-    //     '上限に達しています',
-    //     `家族メンバーは最大5人までです。\n新しいメンバーを招待するには、既存のメンバーを削除してください。`
-    //   );
-    //   return;
-    // }
-
-    // try {
-    //   console.log('🔗 招待トークン生成開始');
-      
-    //   // ✅ トークン生成
-    //   const token = await createInviteLink(
-    //     {
-    //       familyCode,
-    //       maxUses: 10,
-    //       expiresInHours: 24,
-    //     },
-    //     userId
-    //   );
-      
-    //   console.log('✅ トークン生成完了:', token);
-      
-    //   // ✅ トークン付きURL
-    //   const inviteUrl = `${WEB_BASE_URL}/join.html?token=${token}`;
-      
-    //   const shareMessage = `「ぱうぱす」への招待です。家族みんなで、愛犬の足跡を残そう！\n\n下のリンクをタップするだけで簡単に参加できます：\n${inviteUrl}\n\n※このリンクは24時間有効です`;
-      
-    //   await Share.share({
-    //     message: shareMessage,
-    //     title: 'PawPathに招待',
-    //   });
-      
-    //   console.log('✅ 招待リンク共有完了');
-    // } catch (error) {
-    //   console.error('❌ 招待リンク生成エラー:', error);
-    //   Alert.alert('エラー', '招待リンクの生成に失敗しました');
-    // }
   };
 
   // ユーザー情報編集画面へ遷移
@@ -143,34 +98,28 @@ export default function OwnwerSettingsScreen() {
             style={styles.subscriptionCard}
             onPress={() => router.push('/subscription' as any)}
           >
-            {subscription.isLoading ? (
-              <ActivityIndicator size="small" color="#4A90E2" />
-            ) : subscription ? (
-              <>
+            <>
                 <View style={styles.subscriptionHeader}>
                   <View style={styles.subscriptionStatus}>
                     <Ionicons 
                       name={
-                        subscription.isActive ? 'checkmark-circle' : 
-                        subscription.isTrialActive ? 'time' : 
+                        readonly ? 'checkmark-circle' : 
+                        trialUse ? 'time' : 
                         'eye-outline'
                       } 
                       size={24} 
                       color={
-                        subscription.isActive ? '#50C878' : 
-                        subscription.isTrialActive ? '#FF9500' : 
+                        readonly ? '#50C878' : 
+                        trialUse ? '#FF9500' : 
                         '#999999'
                       } 
                     />
-                    <Text style={styles.subscriptionPlan}>
-                      {getSubscriptionDisplayName()}
-                    </Text>
                   </View>
                   <Ionicons name="chevron-forward" size={20} color="#CCCCCC" />
                 </View>
 
                 {/* トライアル表示 */}
-                {subscription.isTrialActive && (
+                {trialUse && (
                   <View style={styles.trialBadge}>
                     <Ionicons name="time-outline" size={16} color="#FF9500" />
                     <Text style={styles.trialText}>
@@ -180,7 +129,7 @@ export default function OwnwerSettingsScreen() {
                 )}
 
                 {/* 閲覧専用モード警告 */}
-                {!subscription.isActive && (
+                {readonly && (
                   <View style={styles.readOnlyWarning}>
                     <Ionicons name="alert-circle-outline" size={16} color="#FF3B30" />
                     <Text style={styles.readOnlyText}>
@@ -189,11 +138,6 @@ export default function OwnwerSettingsScreen() {
                   </View>
                 )}
               </>
-            ) : (
-              <Text style={styles.subscriptionDescription}>
-                サブスクリプション情報を読み込めませんでした
-              </Text>
-            )}
           </TouchableOpacity>
         </View>
 
@@ -301,7 +245,7 @@ export default function OwnwerSettingsScreen() {
         <Text style={styles.sectionTitle}>アプリについて</Text>
         
         {/* 🆕 サブスクリプション管理（契約中のみ表示） */}
-        {subscription?.isActive && (
+        {!readonly && !trialUse && (
           <TouchableOpacity 
             style={styles.aboutLink}
             onPress={handleOpenSubscriptionManagement}

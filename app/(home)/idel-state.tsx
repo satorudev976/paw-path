@@ -1,6 +1,6 @@
 import { ReadOnlyBanner } from '@/components/ui/read-only-banner';
 import { useWalkRecording } from '@/contexts/walk-recording.context';
-import { useSubscription } from '@/hooks/use-subscription';
+import { useAppAccess } from '@/hooks/use-app-access';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
@@ -8,7 +8,7 @@ import { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export function IdleState() {
-  const { isActive } = useSubscription();
+  const { readonly } = useAppAccess();
   const { startRecording } = useWalkRecording();
   const router = useRouter();
 
@@ -58,7 +58,7 @@ export function IdleState() {
     <View style={styles.container}>
       {/* 閲覧専用モードバナー */}
       <ReadOnlyBanner
-        visible={!isActive}
+        visible={readonly}
         onPressUpgrade={() => router.push('/')}
       />
       
@@ -80,11 +80,11 @@ export function IdleState() {
           <TouchableOpacity 
             style={[
               styles.startButton,
-              !isActive && styles.startButtonDisabled
+              readonly && styles.startButtonDisabled
             ]}
             onPress={handleStartRecording}
             activeOpacity={0.8}
-            disabled={!isActive}
+            disabled={readonly}
           >
             <View style={styles.buttonContent}>
               <Ionicons name="play-circle-outline" size={32} color="#FFFFFF" />

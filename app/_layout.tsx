@@ -2,6 +2,7 @@ import { FamilyProvider } from '@/contexts/family.context'
 import { AuthProvider } from '@/contexts/auth.context';
 import { SubscriptionProvider } from '@/contexts/subscription.context';
 import { UserProvider } from '@/contexts/user.context';
+import { AppAccessProvider } from '@/contexts/app-access.context';
 import { WalkRecordingProvider } from '@/contexts/walk-recording.context';
 import { Slot } from 'expo-router';
 import { useEffect } from 'react'
@@ -17,9 +18,11 @@ export default function RootLayout() {
       <UserProvider>
         <FamilyProvider>
           <SubscriptionProvider>
-            <WalkRecordingProvider>
-              <Slot />
-            </WalkRecordingProvider>
+            <AppAccessProvider>
+              <WalkRecordingProvider>
+                <Slot />
+              </WalkRecordingProvider>
+            </AppAccessProvider>
           </SubscriptionProvider>
         </FamilyProvider>
       </UserProvider>
