@@ -226,8 +226,8 @@ export default function OwnwerSettingsScreen() {
 
         <View style={styles.card}>
           <View style={styles.memberList}>
-              {members.map((member, index) => (
-                <View style={styles.memberItem}>
+            {members.map((member) => (
+              <View key={member.id} style={styles.memberItem}>
                 <Ionicons name="person" size={20} color="#666666" />
                 <View style={styles.memberInfo}>
                   <Text style={styles.memberName}>{member.nickname}</Text>
@@ -236,8 +236,8 @@ export default function OwnwerSettingsScreen() {
                   )}
                 </View>
               </View>
-              ))}
-            </View>
+            ))}
+          </View>
         </View>
       </View>
 
