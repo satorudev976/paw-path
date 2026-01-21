@@ -15,7 +15,7 @@ export const useAppSession = () => {
     family.isLoading ||
     subscription.isLoading
 
-  const isLoggedIn = Boolean(auth.firebaseUser)
+  const isLoggedIn = Boolean(auth.authUser)
   const isOnboarded = Boolean(user.user?.nickname)
 
   return {
@@ -23,7 +23,7 @@ export const useAppSession = () => {
     isLoggedIn,
     isOnboarded,
 
-    firebaseUser: auth.firebaseUser,
+    authUser: auth.authUser,
     user: user.user,
     family: family.family,
     subscription,

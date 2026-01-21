@@ -19,7 +19,7 @@ import { useAuth } from '@/hooks/use-auth';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { isLoading, firebaseUser } = useAuth();
+  const { isLoading, authUser } = useAuth();
   const bounceAnim = useState(new Animated.Value(0))[0];
   const [_, googleResponse, promptGoogleSignIn] = useGoogleAuthRequest();
 
@@ -49,10 +49,10 @@ export default function LoginScreen() {
   }, [googleResponse]);
 
   useEffect(() => {
-    if (firebaseUser) {
+    if (authUser) {
       router.replace('/');
     }
-  }, [firebaseUser]);
+  }, [authUser]);
 
   const handleGoogleResponse = async (response: any) => {
     await AuthService.login({

@@ -1,30 +1,30 @@
 import { createContext, useState, useEffect } from 'react';
 import {
   onAuthStateChanged,
-  User as FirebaseUser,
+  User as AuthUser,
 } from 'firebase/auth'
 import { auth } from '@/infrastructure/firebase/auth.firebase'
 
 type AuthContextValue = {
-  firebaseUser: FirebaseUser | null
+  authUser: AuthUser | null
   isLoading: boolean
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null)
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null)
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     return onAuthStateChanged(auth, (user) => {
-      setFirebaseUser(user)
+      setAuthUser(user)
       setIsLoading(false)
     })
   }, [])
 
   return (
-    <AuthContext.Provider value={{ firebaseUser, isLoading }}>
+    <AuthContext.Provider value={{ authUser: authUser, isLoading }}>
       {children}
     </AuthContext.Provider>
   )

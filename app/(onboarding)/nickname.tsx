@@ -19,7 +19,7 @@ import { useAuth } from '@/hooks/use-auth';
  */
 export default function NicknameScreen() {
   const router = useRouter();
-  const { firebaseUser } = useAuth();
+  const { authUser } = useAuth();
   
   const [nickname, setNickname] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -41,12 +41,12 @@ export default function NicknameScreen() {
     setIsLoading(true);
     
     try {
-      if (!firebaseUser) {
+      if (!authUser) {
         return;
       }
-      
+
       await setUpOwnerService.setUp(
-        firebaseUser?.uid,
+        authUser?.uid,
         nickname
       )
       // 成功メッセージ

@@ -12,22 +12,22 @@ type UserContextValue = {
 export const UserContext = createContext<UserContextValue | null>(null)
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { firebaseUser } = useAuth()
+  const { authUser } = useAuth()
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   const load = async () => {
-    if (!firebaseUser) return
+    if (!authUser) return
     setIsLoading(true)
-    const user = await UserService.get(firebaseUser.uid)
+    const user = await UserService.get(authUser.uid)
     setUser(user)
     setIsLoading(false)
   }
 
   useEffect(() => {
-    if (!firebaseUser) return
+    if (!authUser) return
     load()
-  }, [firebaseUser])
+  }, [authUser])
 
   return (
     <UserContext.Provider value={{ user, isLoading, refresh: load }}>
