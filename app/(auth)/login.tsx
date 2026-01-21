@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
+  Alert,
   ActivityIndicator,
   Animated,
   Image,
@@ -11,14 +12,14 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useGoogleAuthRequest } from '@/hooks/google-auth-request'
-import { AuthService, userType } from '@/services/auth.service';
+import { AuthService } from '@/services/auth.service';
 import * as AppleAuthentication from 'expo-apple-authentication'
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/hooks/use-auth';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { isLoading } = useAuth();
+  const { isLoading, firebaseUser } = useAuth();
   const bounceAnim = useState(new Animated.Value(0))[0];
   const [_, googleResponse, promptGoogleSignIn] = useGoogleAuthRequest();
 
@@ -40,16 +41,33 @@ export default function LoginScreen() {
     ).start();
   }, []);
 
-  const handleGoogleSingIn = async () => {
-    if (googleResponse?.type !== 'success') return
-    const idToken = googleResponse.authentication?.idToken
-    if (idToken) {
-      const user = await AuthService.login({
-        provider: 'google',
-        idToken: idToken
-      });
+  // Googleログインのレスポンス処理
+  useEffect(() => {
+    if (googleResponse?.type === 'success') {
+      handleGoogleResponse(googleResponse);
+    }
+  }, [googleResponse]);
 
-      await handleSingIn(user);
+  useEffect(() => {
+    if (firebaseUser) {
+      router.replace('/');
+    }
+  }, [firebaseUser]);
+
+  const handleGoogleResponse = async (response: any) => {
+    await AuthService.login({
+      provider: 'google',
+      idToken: response.params.id_token,
+    });
+  }
+
+  const handleGoogleSingIn = async () => {
+    try {
+      const result = await promptGoogleSignIn();
+      console.log('Google認証完了:', result.type);
+    } catch (e) {
+      console.error(e)
+      Alert.alert('Googleログインに失敗しました')
     }
   }
 
@@ -66,25 +84,7 @@ export default function LoginScreen() {
           provider: 'apple',
           idToken: idToken
         });
-
-        await handleSingIn(user);
       }
-  }
-
-  const handleSingIn = async (user: userType) => {
-    
-    if (user.type === 'authenticated') {
-      // 既存ユーザーがログアウトして、再度ログイン
-      router.replace('/(tabs)');
-    } else {
-      // 新規ユーザー
-      router.replace({
-        pathname: '/(onboarding)/nickname',
-        params: {
-          authUid: user.authUid,
-        },
-      });
-    }
   }
 
 
