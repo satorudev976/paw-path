@@ -30,8 +30,9 @@ service cloud.firestore {
     }
     match /users/{uid} {
 
-      // 自分の user は読める
-      allow read: if isSignedIn() && request.auth.uid == uid;
+      // 家族メンバーは read 可
+       allow read: if isSignedIn() 
+        && userDoc(request.auth.uid).data.familyId == resource.data.familyId;
 
       // 作成（新規ログイン時）
       allow create: if isSignedIn()
