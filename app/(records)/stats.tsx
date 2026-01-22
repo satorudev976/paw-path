@@ -9,10 +9,12 @@ import { SkeletonStatCard } from '@/components/ui/skeleton';
 import Toast from '@/components/ui/toast';
 import { useToast } from '@/hooks/toast';
 import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
-
+import { WalkService } from '@/services/walk.service';
+import { useUser } from '@/hooks/use-user';
 type Period = 'week' | 'month';
 
 export default function StatsView() {
+  const { user } = useUser();
   const [selectedPeriod, setSelectedPeriod] = useState<Period>('week');
   const [walks, setWalks] = useState<Walk[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -41,19 +43,13 @@ export default function StatsView() {
     setError(null);
     
     try {
+
+      if (!user) return ;
   
       let walksData: Walk[] = [];
       const now = new Date();
-  
-      if (selectedPeriod === 'week') {
-        const weekAgo = new Date(now);
-        weekAgo.setDate(weekAgo.getDate() - 7);
-        //walksData = await getWalksByDateRange(familyId, weekAgo, now);
-      } else if (selectedPeriod === 'month') {
-        const monthAgo = new Date(now);
-        monthAgo.setDate(monthAgo.getDate() - 30);
-        //walksData = await getWalksByDateRange(familyId, monthAgo, now);
-      }
+      const startDate = new Date(now);
+      startDate.setDate(startDate.getDate() - (selectedPeriod === 'week' ? 7 : 30));
   
       console.log(`${selectedPeriod}の散歩データ:`, walksData.length);
       setWalks(walksData);
@@ -155,7 +151,7 @@ export default function StatsView() {
             try {
               console.log('散歩記録削除:', walk.walkId);
               
-              //await deleteWalk(walk.walkId);
+              await WalkService.delete(walk.walkId);
               
               // ローカルステートから削除
               const updatedWalks = walks.filter(w => w.walkId !== walk.walkId);

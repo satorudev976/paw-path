@@ -2,19 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import ErrorView from '@/components/ui/error';
 import { SkeletonStatCard } from '@/components/ui/skeleton';
+import { WalkStatisticsService, UserWalkStatistics } from '@/services/walk-statistics.service';
+import { useUser } from '@/hooks/use-user';
 
 type Period = 'week' | 'month';
 
-interface UserStats {
-  userId: string;
-  name: string;
-  count: number;
-  totalDistance: number;
-  totalDuration: number;
-}
-
 export default function RankingView() {
-  const [rankings, setRankings] = useState<UserStats[]>([]);
+  const { user } = useUser();
+  const [rankings, setRankings] = useState<UserWalkStatistics[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState<Period>('week');
@@ -28,28 +23,17 @@ export default function RankingView() {
     setError(null);
     
     try {
-      let startDate: Date | undefined;
+      if (!user) return null ;
+
       const now = new Date();
-  
-      if (selectedPeriod === 'week') {
-        startDate = new Date(now);
-        startDate.setDate(startDate.getDate() - 7);
-      } else if (selectedPeriod === 'month') {
-        startDate = new Date(now);
-        startDate.setDate(startDate.getDate() - 30);
-      }
-  
-    //   const statsMap = await getStatsByUser(familyId, startDate, now);
-      
-    //   const statsArray: UserStats[] = Array.from(statsMap.entries()).map(([userId, stats]) => ({
-    //     userId,
-    //     ...stats,
-    //   }));
-  
-    //   statsArray.sort((a, b) => b.totalDistance - a.totalDistance);
-  
-    //   setRankings(statsArray);
-      setRankings([]);
+      const startDate = new Date(now);
+      startDate.setDate(startDate.getDate() - (selectedPeriod === 'week' ? 7 : 30));
+      const stats = await WalkStatisticsService.getWalkFamilyRanking(
+        user.familyId,
+        startDate,
+        now
+      )
+      setRankings(stats);
     } catch (err: any) {
       console.error('ランキングデータ取得エラー:', err);
       

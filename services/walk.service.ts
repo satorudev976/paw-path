@@ -1,6 +1,8 @@
 import { Walk } from "@/domain/entities/walk";
 import { walkRepository } from "@/infrastructure/firebase/repositories/walk.repository";
+
 export const WalkService = {
+
   async listByDateRange(
     familyId: string,
     startDate: Date,
@@ -11,4 +13,8 @@ export const WalkService = {
     );
     return walks
   },
+
+  async delete(walkId: string): Promise<void> {
+    await walkRepository.deleteWalk(walkId);
+  }
 }
