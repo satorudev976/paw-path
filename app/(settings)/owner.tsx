@@ -114,6 +114,11 @@ export default function OwnwerSettingsScreen() {
                         '#999999'
                       } 
                     />
+                    <Text style={styles.subscriptionPlan}>
+                      {trialUse ? 'アプリお試し期間中' : 
+                      readonly ? '閲覧専用モード' : 
+                      'プロプラン'}
+                    </Text>
                   </View>
                   <Ionicons name="chevron-forward" size={20} color="#CCCCCC" />
                 </View>
