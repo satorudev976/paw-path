@@ -1,4 +1,3 @@
-// infrastructure/firebase/repositories/auth.repository.ts
 import {
   signInWithCredential,
   GoogleAuthProvider,

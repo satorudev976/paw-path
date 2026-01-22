@@ -80,7 +80,7 @@ export default function LoginScreen() {
     })
     const idToken = result.identityToken
       if (idToken) {
-        const user = await AuthService.login({
+        await AuthService.login({
           provider: 'apple',
           idToken: idToken
         });

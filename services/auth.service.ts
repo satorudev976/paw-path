@@ -10,4 +10,9 @@ export const AuthService = {
         ? await authRepository.signInWithGoogle(params.idToken)
         : await authRepository.signInWithApple(params.idToken)
   },
+
+  async logout(): Promise<void> {
+    
+    await authRepository.signOut();
+  }
 }
