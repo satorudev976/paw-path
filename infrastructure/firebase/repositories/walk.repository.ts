@@ -24,15 +24,15 @@ export const walkRepository = {
     startDate: Date,
     endDate: Date
   ): Promise<Walk[]> {
-    const walksRef = collection(db, 'walks');
+    const walksRef = collection(db, 'families', familyId, 'walks');
+
     const q = query(
       walksRef,
-      where('familyId', '==', familyId),
       where('startTime', '>=', Timestamp.fromDate(startDate)),
       where('startTime', '<=', Timestamp.fromDate(endDate)),
       orderBy('startTime', 'asc')
     );
-  
+    
     const querySnapshot = await getDocs(q);
     
     return querySnapshot.docs.map(doc => {
