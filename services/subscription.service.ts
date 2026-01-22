@@ -1,4 +1,4 @@
-import Purchases from 'react-native-purchases'
+import Purchases, { PurchasesPackage } from 'react-native-purchases'
 import Constants from 'expo-constants'
 
 export const SubscriptionService = {
@@ -21,4 +21,25 @@ export const SubscriptionService = {
       info.entitlements.active[Constants.expoConfig?.extra?.revenuCat?.entitlement]
     )
   },
+
+  async purchasePackage(packageToPurchase: PurchasesPackage): Promise<boolean> {
+    const { customerInfo } =
+    await Purchases.purchasePackage(packageToPurchase)
+
+    return Boolean(
+      customerInfo.entitlements.active[
+        Constants.expoConfig?.extra?.revenuCat?.entitlement
+      ]
+    )
+  },
+
+  async restorePurchases(): Promise<boolean> {
+    const customerInfo = await Purchases.restorePurchases()
+  
+    return Boolean(
+      customerInfo.entitlements.active[
+        Constants.expoConfig?.extra?.revenuCat?.entitlement
+      ]
+    )
+  }
 }
