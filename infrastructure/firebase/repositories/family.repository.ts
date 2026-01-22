@@ -17,7 +17,6 @@ export const familyRepository = {
       createdAt: Timestamp.fromDate(family.createdAt),
       planStatus: family.planStatus,
       trialEndAt: Timestamp.fromDate(family.trialEndAt),
-      trialUsed: family.trialUsed,
     });
   },
 
@@ -34,7 +33,6 @@ export const familyRepository = {
       createdAt: data.createdAt.toDate(),
       planStatus: data.planStatus,
       trialEndAt: data.trialEndAt.toDate(),
-      trialUsed: data.trialUsed,
     } as Family;
   },
 
@@ -49,11 +47,4 @@ export const familyRepository = {
     })
   },
 
-  async updateTrialUsed(familyId: string, trialUsed: boolean): Promise<void> {
-    const ref = doc(db, 'families', familyId)
-
-    await updateDoc(ref, {
-      trialUsed: trialUsed,
-    })
-  },
 };

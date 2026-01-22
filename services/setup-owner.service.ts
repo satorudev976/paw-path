@@ -24,7 +24,6 @@ export const setUpOwnerService = {
       createdAt: now,
       planStatus: 'active',
       trialEndAt,
-      trialUsed: true,
     }
   
     const newUser: User = {

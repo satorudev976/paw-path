@@ -20,11 +20,5 @@ export const FamilyService = {
     await familyRepository.updatePlanStatus(familyId, status);
   },
 
-  /**
-   * trial 使用済みフラグを立てる
-   */
-  async markTrialUsed(familyId: string): Promise<void> {
-    await familyRepository.updateTrialUsed(familyId, true);
-  },
 }
   
