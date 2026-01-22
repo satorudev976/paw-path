@@ -7,8 +7,6 @@ export const UserService = {
    */
   async get(uid: string): Promise<User | null> {
     const user = await userRepository.findById(uid);
-
-    if (!user) return null
     return user
   },
 
