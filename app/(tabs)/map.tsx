@@ -14,7 +14,7 @@ import { WalkService } from '@/services/walk.service';
 import { Walk } from '@/domain/entities/walk';
 import { useFocusEffect } from '@react-navigation/native';
 import { WEEKDAY_COLORS, applyOpacity } from '@/utils/color'
-import { formatDateKey, getWeekStart, getWeekEnd } from '@/utils/date';
+import { formatDate, getWeekStart, getWeekEnd } from '@/utils/date';
 import { useUser } from '@/hooks/use-user';
 import { useRouteAnimation } from '@/hooks/root-animation';
 import { WalkMapService } from '@/services/walk-map.service';
@@ -83,28 +83,19 @@ export default function MapScreen() {
     setError(null);
     
     try {
-
-      if (!user) {
-        return;
-      }
-      
+      if (!user) return;
       setWalks([]);
       setIsLoading(false);
-  
       const weekEnd = getWeekEnd(currentWeekStart);
       console.log('散歩データ取得:', currentWeekStart, '〜', weekEnd);
-  
       const walksData = await WalkService.listByDateRange(
         user.familyId,
         currentWeekStart,
         weekEnd
       );
-  
-      console.log('取得した散歩数:', walksData.length);
       setWalks(walksData);
     } catch (err: any) {
       console.error('散歩データ取得エラー:', err);
-      
       if (err.message?.includes('network')) {
         setError('network');
       } else {
@@ -127,20 +118,7 @@ export default function MapScreen() {
     setCurrentWeekStart(newStart);
   };
 
-  const formatDate = (date: Date) => {
-    return `${date.getFullYear()}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}`;
-  };
-
   const getMapRegion = () => {
-    if (walks.length === 0) {
-      return {
-        latitude: 35.6812,
-        longitude: 139.7671,
-        latitudeDelta: 0.05,
-        longitudeDelta: 0.05,
-      };
-    }
-
     let minLat = 90;
     let maxLat = -90;
     let minLng = 180;

@@ -1,3 +1,9 @@
+export function formatDate(date: Date): string {
+  return `${date.getFullYear()}/${(date.getMonth() + 1)
+    .toString()
+    .padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}`
+}
+
 export function getWeekStart(date: Date): Date {
   const d = new Date(date)
   d.setHours(0, 0, 0, 0)
