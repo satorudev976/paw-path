@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "paw-path",
+    "target": "web",
     "public": "public",
     "rewrites": [
       {

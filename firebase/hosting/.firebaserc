@@ -6,12 +6,12 @@
   "targets": {
     "pawpath-dev": {
       "hosting": {
-        "web": ["paw-path-dev"]
+        "web": ["pawpath-dev"]
       }
     },
     "pawpath-prod": {
       "hosting": {
-        "web": ["paw-path"]
+        "web": ["pawpath"]
       }
     }
   }

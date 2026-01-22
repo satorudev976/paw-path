@@ -29,3 +29,15 @@ npx eas build --profile preview
 npx eas build --profile production
 npx eas submit --profile production
 ```
+
+## hostingデプロイ Dev
+```
+firebase use default
+firebase deploy --only hosting
+```
+
+## hostingデプロイ Prod
+```
+firebase use prod
+firebase deploy --only hosting
+```
