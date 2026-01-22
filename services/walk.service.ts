@@ -6,9 +6,9 @@ export const WalkService = {
     startDate: Date,
     endDate: Date,
   ): Promise<Walk[]> {
-    const user = await walkRepository.getWalksByDateRange(
+    const walks = await walkRepository.getWalksByDateRange(
       familyId, startDate, endDate
     );
-    return user
+    return walks
   },
 }
