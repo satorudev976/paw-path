@@ -18,8 +18,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const loadUser = async (uid: string) => {
     setIsLoading(true)
     try {
-      const userData = await UserService.get(uid)
-      setUser(userData)
+      const user = await UserService.get(uid)
+      setUser(user)
     } catch (error) {
       console.error('ユーザー情報取得エラー:', error)
       setUser(null)

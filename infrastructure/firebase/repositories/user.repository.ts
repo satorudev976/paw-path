@@ -17,20 +17,29 @@ import {
 export const userRepository = {
   
   async findById(userId: string): Promise<User | null> {
-    const ref = doc(db, "users", userId)
-    const snap = await getDoc(ref)
+    try {
+      const ref = doc(db, "users", userId)
+      const snap = await getDoc(ref)
 
-    if (!snap.exists()) return null
+      if (!snap.exists()) return null
 
-    const user = snap.data()
+      const user = snap.data()
 
-    return {
-      id: snap.id,
-      familyId: user.familyId,
-      nickname: user.nickname,
-      role: user.role,
-      createdAt: user.createdAt.toDate()
+      return {
+        id: snap.id,
+        familyId: user.familyId,
+        nickname: user.nickname,
+        role: user.role,
+        createdAt: user.createdAt.toDate()
+      }
+    } catch (error: any) {
+      // アカウント作成前の新規ユーザーのユーザー情報取得時
+      if (error.code === 'permission-denied') {
+        return null
+      }
+      throw error
     }
+    
   },
 
   async findByFamilyId(familyId: string): Promise<User[]> {
