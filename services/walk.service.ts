@@ -1,0 +1,14 @@
+import { Walk } from "@/domain/entities/walk";
+import { walkRepository } from "@/infrastructure/firebase/repositories/walk.repository";
+export const WalkService = {
+  async listByDateRange(
+    familyId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<Walk[]> {
+    const user = await walkRepository.getWalksByDateRange(
+      familyId, startDate, endDate
+    );
+    return user
+  },
+}
