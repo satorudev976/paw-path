@@ -1,11 +1,11 @@
 export interface Walk {
   walkId: string;
-  familyCode: string;
+  familyId: string;
   startTime: Date;
   endTime: Date;
-  duration: number; // 秒
-  distance: number; // メートル
-  route: RoutePoint[];
+  durationSec: number; // 秒
+  distanceMeter: number; // メートル
+  routePoints: RoutePoint[];
   recordedBy?: string; // ユーザーID
 }
 
