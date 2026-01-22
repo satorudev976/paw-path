@@ -1,10 +1,13 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
 
     function isSignedIn() {
       return request.auth != null;
+    }
+
+    function userExists(uid) {
+      return exists(/databases/$(database)/documents/users/$(uid));
     }
 
     function userDoc(uid) {
@@ -13,77 +16,82 @@ service cloud.firestore {
 
     function isOwner() {
       return isSignedIn()
+        && userExists(request.auth.uid)
         && userDoc(request.auth.uid).data.role == 'owner';
     }
 
-    function belongsToFamily(familyId) {
+    function belongsToFamilySafe(familyId) {
       return isSignedIn()
+        && userExists(request.auth.uid)
         && userDoc(request.auth.uid).data.familyId == familyId;
     }
 
     match /users/{uid} {
 
-      // 家族メンバーは read 可
-       allow read: if isSignedIn() 
+      // 自分自身の User は存在していなくても read OK
+      allow read: if isSignedIn() && request.auth.uid == uid;
+
+      // 家族メンバーは User が存在していれば read OK
+      allow read: if isSignedIn()
+        && userExists(request.auth.uid)
+        && resource != null
         && userDoc(request.auth.uid).data.familyId == resource.data.familyId;
 
       // 作成（新規ログイン時）
-      allow create: if isSignedIn()
-        && request.auth.uid == uid;
+      allow create: if isSignedIn() && request.auth.uid == uid;
 
       // 更新（nickname など）
-      allow update: if isSignedIn()
-        && request.auth.uid == uid;
+      allow update: if isSignedIn() && request.auth.uid == uid;
 
       // 削除（アカウント削除）
-      allow delete: if isSignedIn()
-        && request.auth.uid == uid;
+      allow delete: if isSignedIn() && request.auth.uid == uid;
     }
+
     match /families/{familyId} {
 
       // 家族メンバーは read 可
-      allow read: if belongsToFamily(familyId);
+      allow read: if belongsToFamilySafe(familyId);
 
       // 作成（新規のみ）
       allow create: if isSignedIn();
 
       // 更新は owner のみ
-      allow update: if belongsToFamily(familyId)
-        && isOwner();
+      allow update: if belongsToFamilySafe(familyId) && isOwner();
 
-      // 削除は原則禁止（事故防止）
+      // 削除は原則禁止
       allow delete: if false;
     }
+
     match /families/{familyId}/walks/{walkId} {
 
-      // 家族なら閲覧可（readOnly でも OK）
-      allow read: if belongsToFamily(familyId);
+      // 家族なら閲覧可
+      allow read: if resource != null && belongsToFamilySafe(familyId);
 
       // 作成：家族 
-      allow create: if belongsToFamily(familyId)
+      allow create: if belongsToFamilySafe(familyId)
         && request.resource.data.recordedBy == request.auth.uid;
 
       // 更新：禁止（immutable）
       allow update: if false;
 
       // 削除：記録者のみ
-      allow delete: if belongsToFamily(familyId)
+      allow delete: if resource != null 
+        && belongsToFamilySafe(familyId)
         && resource.data.recordedBy == request.auth.uid;
     }
+
     match /invites/{inviteId} {
 
       // 家族オーナーのみ read
-      allow read: if isSignedIn()
-        && isOwner();
+      allow read: if isSignedIn() && isOwner();
 
-      // 作成：オーナーのみ（回数制限は Function）
-      allow create: if isSignedIn()
-        && isOwner();
+      // 作成：オーナーのみ
+      allow create: if isSignedIn() && isOwner();
 
       // 更新：Function のみ想定
       allow update: if false;
 
-      // 削除：期限切れ cleanup 用（Function）
+      // 削除：期限切れ cleanup 用
       allow delete: if false;
     }
   }
