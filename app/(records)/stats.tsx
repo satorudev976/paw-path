@@ -46,11 +46,14 @@ export default function StatsView() {
 
       if (!user) return ;
   
-      let walksData: Walk[] = [];
       const now = new Date();
       const startDate = new Date(now);
       startDate.setDate(startDate.getDate() - (selectedPeriod === 'week' ? 7 : 30));
-  
+      const walksData = await WalkService.listByDateRange(
+        user.familyId,
+        startDate,
+        now
+      )
       console.log(`${selectedPeriod}の散歩データ:`, walksData.length);
       setWalks(walksData);
       calculateStats(walksData);
