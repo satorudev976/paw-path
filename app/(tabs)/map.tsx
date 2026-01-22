@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  Animated,
   ScrollView,
   StyleSheet,
   Text,
@@ -17,6 +16,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { WEEKDAY_COLORS, applyOpacity } from '@/utils/color'
 import { formatDateKey, getWeekStart, getWeekEnd } from '@/utils/date';
 import { useUser } from '@/hooks/use-user';
+import { useRouteAnimation } from '@/hooks/root-animation';
 // 同日の散歩にインデックスを付与した拡張型
 interface WalkWithIndex extends Walk {
   sameDayIndex: number;
@@ -80,12 +80,14 @@ export default function MapScreen() {
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(getWeekStart(new Date()));
 
   // アニメーション関連の状態
-  const [animatingWalkId, setAnimatingWalkId] = useState<string | null>(null);
-  const [markerPosition, setMarkerPosition] = useState<{ latitude: number; longitude: number } | null>(null);
-  const animationProgress = useRef(new Animated.Value(0)).current;
-  const mapRef = useRef<MapView>(null);
-  const animationTriggered = useRef<string | null>(null); // どのwalkIdでアニメーションを開始したか記録
-  
+  const mapRef = useRef<MapView>(null)
+  const {
+    animatingWalkId,
+    markerPosition,
+    startAnimation,
+    resetAnimationKey,
+  } = useRouteAnimation(mapRef)
+ 
   // URLパラメータから取得
   const params = useLocalSearchParams();
   const animateWalkIdParam = typeof params.animateWalkId === 'string' ? params.animateWalkId : null;
@@ -102,7 +104,7 @@ export default function MapScreen() {
       if (currentWeekStart.getTime() !== walkWeekStart.getTime()) {
         console.log('パラメータの日付から週を設定:', walkDate, '→', walkWeekStart);
         setCurrentWeekStart(walkWeekStart);
-        animationTriggered.current = null; // アニメーションフラグをリセット
+        resetAnimationKey(); // アニメーションフラグをリセット
       }
     }
   }, [animateDateParam]); // animateDateParamが変わるたびに実行
@@ -115,25 +117,17 @@ export default function MapScreen() {
   );
   // データ取得後、アニメーションを開始
   useEffect(() => {
-    if (!animateWalkIdParam || walks.length === 0) return;
-    
-    const walkToAnimate = walks.find(w => w.walkId === animateWalkIdParam);
-    if (!walkToAnimate) {
-      console.log('アニメーション対象の散歩が見つかりません:', animateWalkIdParam);
-      console.log('利用可能な散歩:', walks.map(w => w.walkId));
-      return;
-    }
-    
-    // timestampを使って同じwalkIdでも再アニメーション可能にする
-    const animationKey = timestampParam || animateWalkIdParam;
-    if (animationTriggered.current !== animationKey) {
-      console.log('→ アニメーション開始:', walkToAnimate.startTime);
-      animationTriggered.current = animationKey;
-      setTimeout(() => {
-        startRouteAnimation(walkToAnimate);
-      }, 500);
-    }
-    
+    if (!animateWalkIdParam || walks.length === 0) return
+
+    const walk = walks.find(w => w.walkId === animateWalkIdParam)
+    if (!walk) return
+
+    setTimeout(() => {
+      startAnimation(
+        walk,
+        timestampParam || animateWalkIdParam
+      )
+    }, 500)
   }, [walks, animateWalkIdParam, timestampParam]);
 
 
@@ -188,53 +182,6 @@ export default function MapScreen() {
 
   const formatDate = (date: Date) => {
     return `${date.getFullYear()}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}`;
-  };
-
-  // ルートアニメーションを開始
-  const startRouteAnimation = (walk: Walk) => {
-    if (walk.routePoints.length === 0) return;
-
-    setAnimatingWalkId(walk.walkId);
-    animationProgress.setValue(0);
-
-    // 地図をそのルートに合わせてズーム
-    if (mapRef.current && walk.routePoints.length > 0) {
-      const coordinates = walk.routePoints.map(point => ({
-        latitude: point.latitude,
-        longitude: point.longitude,
-      }));
-      
-      mapRef.current.fitToCoordinates(coordinates, {
-        edgePadding: { top: 100, right: 50, bottom: 100, left: 50 },
-        animated: true,
-      });
-    }
-
-    // アニメーション: マーカーがルートに沿って移動
-    const totalPoints = walk.routePoints.length;
-    
-    Animated.timing(animationProgress, {
-      toValue: totalPoints - 1,
-      duration: 5000, // 5秒でルート全体を移動（より遅く）
-      useNativeDriver: false,
-    }).start(() => {
-      // アニメーション終了後、3秒待ってから通常表示に戻る
-      setTimeout(() => {
-        setAnimatingWalkId(null);
-        setMarkerPosition(null);
-      }, 3000);
-    });
-
-    // マーカー位置を更新するリスナー
-    animationProgress.addListener(({ value }) => {
-      const index = Math.floor(value);
-      if (index < walk.routePoints.length) {
-        setMarkerPosition({
-          latitude: walk.routePoints[index].latitude,
-          longitude: walk.routePoints[index].longitude,
-        });
-      }
-    });
   };
 
   const getMapRegion = () => {
