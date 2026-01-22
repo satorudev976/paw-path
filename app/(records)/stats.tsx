@@ -95,15 +95,6 @@ export default function StatsView() {
     });
   };
 
-  const getPeriodLabel = () => {
-    switch (selectedPeriod) {
-      case 'week':
-        return '過去7日間';
-      case 'month':
-        return '過去30日間';
-    }
-  };
-
   const handleWalkPress = (walk: Walk) => {
     // 全てのスワイプを閉じる
     swipeableRefs.current.forEach((ref) => ref?.close());
@@ -211,7 +202,9 @@ export default function StatsView() {
 
       {/* 期間表示 */}
       <View style={styles.periodInfo}>
-        <Text style={styles.periodText}>{getPeriodLabel()}</Text>
+        <Text style={styles.periodText}>
+          {selectedPeriod === 'week' ? '過去7日間' : '過去30日間'}
+        </Text>
       </View>
 
       {/* コンテンツ */}

@@ -47,22 +47,6 @@ export default function RankingView() {
     }
   };
 
-  const getMedalEmoji = (rank: number) => {
-    switch (rank) {
-      case 1: return '🥇';
-      case 2: return '🥈';
-      case 3: return '🥉';
-      default: return `${rank}位`;
-    }
-  };
-
-  const getPeriodLabel = () => {
-    switch (selectedPeriod) {
-      case 'week': return '過去7日間';
-      case 'month': return '過去30日間';
-    }
-  };
-
   return (
     <>
       {/* 期間選択タブ */}
@@ -87,7 +71,9 @@ export default function RankingView() {
 
       {/* 期間表示 */}
       <View style={styles.periodInfo}>
-        <Text style={styles.periodText}>{getPeriodLabel()}</Text>
+        <Text style={styles.periodText}>
+          {selectedPeriod === 'week' ? '過去7日間' : '過去30日間'}
+        </Text>
       </View>
 
       {/* コンテンツ */}
@@ -123,7 +109,9 @@ export default function RankingView() {
               ]}
             >
               <View style={styles.rankHeader}>
-                <Text style={styles.rankNumber}>{getMedalEmoji(index + 1)}</Text>
+                <Text style={styles.rankNumber}>
+                  {index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}
+                </Text>
                 <Text style={styles.userName}>{user.nickname}</Text>
               </View>
 
