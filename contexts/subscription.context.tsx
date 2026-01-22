@@ -8,6 +8,7 @@ import { SubscriptionService } from '@/services/subscription.service'
 type SubscriptionContextValue = {
   hasEntitlement: boolean
   isLoading: boolean
+  refresh: () => Promise<void>
 }
 
 export const SubscriptionContext =
@@ -38,7 +39,7 @@ export const SubscriptionProvider: React.FC<{
 
   return (
     <SubscriptionContext.Provider
-      value={{ hasEntitlement, isLoading }}
+      value={{ hasEntitlement, isLoading, refresh: loadSubscription }}
     >
       {children}
     </SubscriptionContext.Provider>
