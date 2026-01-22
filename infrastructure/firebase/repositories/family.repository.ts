@@ -3,7 +3,6 @@ import { Family } from '@/domain/entities/family';
 import {
   doc,
   getDoc,
-  updateDoc,
   Timestamp,
   Transaction,
 } from 'firebase/firestore';
@@ -15,7 +14,6 @@ export const familyRepository = {
 
     tx.set(ref, {
       createdAt: Timestamp.fromDate(family.createdAt),
-      planStatus: family.planStatus,
       trialEndAt: Timestamp.fromDate(family.trialEndAt),
     });
   },
@@ -31,20 +29,8 @@ export const familyRepository = {
     return {
       id: snap.id,
       createdAt: data.createdAt.toDate(),
-      planStatus: data.planStatus,
       trialEndAt: data.trialEndAt.toDate(),
     } as Family;
-  },
-
-  async updatePlanStatus(
-    familyId: string,
-    status: 'active' | 'readOnly'
-  ): Promise<void> {
-    const ref = doc(db, 'families', familyId)
-
-    await updateDoc(ref, {
-      planStatus: status,
-    })
   },
 
 };

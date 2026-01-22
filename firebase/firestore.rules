@@ -25,9 +25,6 @@ service cloud.firestore {
         && userDoc(request.auth.uid).data.familyId == familyId;
     }
 
-    function familyIsWritable(familyId) {
-      return familyDoc(familyId).data.planStatus == 'active';
-    }
     match /users/{uid} {
 
       // 家族メンバーは read 可

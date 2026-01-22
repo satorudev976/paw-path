@@ -22,7 +22,6 @@ export const setUpOwnerService = {
     const family: Family = {
       id: familyId,
       createdAt: now,
-      planStatus: 'active',
       trialEndAt,
     }
   

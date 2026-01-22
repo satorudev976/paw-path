@@ -13,12 +13,5 @@ export const FamilyService = {
     return family
   },
 
-  /**
-   * planStatus 更新（ownerのみ想定）
-   */
-  async updatePlanStatus(familyId: string, status: 'active' | 'readOnly'): Promise<void> {
-    await familyRepository.updatePlanStatus(familyId, status);
-  },
-
 }
   
