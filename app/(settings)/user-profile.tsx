@@ -21,9 +21,6 @@ export default function UserProfileScreen() {
   const router = useRouter();
   const { user, refresh } = useUser();
   const { authUser } = useAuth();
-
-  const [userNickname, setUserNickname] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   
   const [editedNickname, setEditedNickname] = useState<string>('');
   const [hasChanges, setHasChanges] = useState(false);
@@ -35,46 +32,35 @@ export default function UserProfileScreen() {
   }, [authUser]);
 
   useEffect(() => {
-    loadUserInfo();
-  }, []);
-
-  const loadUserInfo = async () => {
-    try {
-      if (user) {
-        setUserNickname(user.nickname);
-        setEditedNickname(user.nickname);
-      }
-      setIsLoading(false);
-    } catch (error) {
-      console.error('ユーザー情報読み込みエラー:', error);
-      setIsLoading(false);
+    if (user) {
+      setEditedNickname(user.nickname);
     }
-  };
+  }, [user]);
 
   const handleNicknameChange = (text: string) => {
     setEditedNickname(text);
-    setHasChanges(text.trim() !== userNickname);
+    setHasChanges(user ? text.trim() !== user.nickname : false);
   };
 
   const handleResetNickname = () => {
-    setEditedNickname(userNickname || '');
-    setHasChanges(false);
+    if (user) {
+      setEditedNickname(user.nickname);
+      setHasChanges(false);
+    }
   };
 
   const handleSaveNickname = async () => {
-    if (!user) {
-      return
-    }
+    if (!user) return;
+    
     if (!editedNickname.trim()) {
       Alert.alert('エラー', 'ニックネームを入力してください');
       return;
     }
 
     try {
-      await UserService.setNickname(user?.id, editedNickname.trim())      
-      setUserNickname(editedNickname.trim());
-      setHasChanges(false);
+      await UserService.setNickname(user.id, editedNickname.trim());
       await refresh();
+      setHasChanges(false);
       Alert.alert('成功', 'ニックネームを保存しました');
     } catch (error) {
       console.error('ニックネーム保存エラー:', error);
@@ -134,15 +120,13 @@ export default function UserProfileScreen() {
 
   const executeAccountDeletion = async () => {
     try {
-      setIsLoading(true);
       console.log('アカウント削除開始:');
     } catch (error: any) {
       console.error('❌ アカウント削除エラー:', error);
-      setIsLoading(false);
     }
   };
 
-  if (isLoading) {
+  if (!user) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#4A90E2" />
