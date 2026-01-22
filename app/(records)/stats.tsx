@@ -7,6 +7,7 @@ import { Walk } from '@/domain/entities/walk';
 import ErrorView from '@/components/ui/error';
 import { SkeletonStatCard } from '@/components/ui/skeleton';
 import Toast from '@/components/ui/toast';
+import { useToast } from '@/hooks/toast';
 import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
 
 type Period = 'week' | 'month';
@@ -82,8 +83,8 @@ export default function StatsView() {
       return;
     }
 
-    const totalDistance = walksData.reduce((sum, walk) => sum + walk.distance, 0);
-    const totalDuration = walksData.reduce((sum, walk) => sum + walk.duration, 0);
+    const totalDistance = walksData.reduce((sum, walk) => sum + walk.distanceMeter, 0);
+    const totalDuration = walksData.reduce((sum, walk) => sum + walk.durationSec, 0);
 
     setStats({
       count: walksData.length,
@@ -137,7 +138,7 @@ export default function StatsView() {
     
     Alert.alert(
       '散歩記録を削除',
-      `${dateStr} ${timeStr}の記録を削除しますか？\n\n距離: ${formatDistance(walk.distance)}km\n所要時間: ${formatDuration(walk.duration)}\n\nこの操作は取り消せません。`,
+      `${dateStr} ${timeStr}の記録を削除しますか？\nこの操作は取り消せません。`,
       [
         { 
           text: 'キャンセル', 
@@ -307,8 +308,8 @@ export default function StatsView() {
                     </Text>
                   </View>
                   <View style={styles.historyStats}>
-                    <Text style={styles.historyDistance}>{formatDistance(walk.distance)}km</Text>
-                    <Text style={styles.historyDuration}>{formatDuration(walk.duration)}</Text>
+                    <Text style={styles.historyDistance}>{formatDistance(walk.distanceMeter)}km</Text>
+                    <Text style={styles.historyDuration}>{formatDuration(walk.durationSec)}</Text>
                   </View>
                   <Ionicons name="chevron-forward" size={24} color="#CCCCCC" />
                 </TouchableOpacity>
