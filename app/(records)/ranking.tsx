@@ -4,7 +4,7 @@ import ErrorView from '@/components/ui/error';
 import { SkeletonStatCard } from '@/components/ui/skeleton';
 import { WalkStatisticsService, UserWalkStatistics } from '@/services/walk-statistics.service';
 import { useUser } from '@/hooks/use-user';
-
+import { formatDistance, formatDuration } from '@/utils/formatters';
 type Period = 'week' | 'month';
 
 export default function RankingView() {
@@ -45,20 +45,6 @@ export default function RankingView() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const formatDistance = (meters: number) => {
-    return (meters / 1000).toFixed(1);
-  };
-
-  const formatDuration = (seconds: number) => {
-    const hrs = Math.floor(seconds / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
-    
-    if (hrs > 0) {
-      return `${hrs}時間${mins}分`;
-    }
-    return `${mins}分`;
   };
 
   const getMedalEmoji = (rank: number) => {
@@ -138,7 +124,7 @@ export default function RankingView() {
             >
               <View style={styles.rankHeader}>
                 <Text style={styles.rankNumber}>{getMedalEmoji(index + 1)}</Text>
-                <Text style={styles.userName}>{user.name}</Text>
+                <Text style={styles.userName}>{user.nickname}</Text>
               </View>
 
               <View style={styles.statsRow}>

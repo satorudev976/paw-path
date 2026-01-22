@@ -11,6 +11,8 @@ import { useToast } from '@/hooks/toast';
 import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
 import { WalkService } from '@/services/walk.service';
 import { useUser } from '@/hooks/use-user';
+import { formatDistance, formatDuration } from '@/utils/formatters';
+
 type Period = 'week' | 'month';
 
 export default function StatsView() {
@@ -91,20 +93,6 @@ export default function StatsView() {
       avgDistance: totalDistance / walksData.length,
       avgDuration: totalDuration / walksData.length,
     });
-  };
-
-  const formatDistance = (meters: number) => {
-    return (meters / 1000).toFixed(1);
-  };
-
-  const formatDuration = (seconds: number) => {
-    const hrs = Math.floor(seconds / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
-    
-    if (hrs > 0) {
-      return `${hrs}時間${mins}分`;
-    }
-    return `${mins}分`;
   };
 
   const getPeriodLabel = () => {
