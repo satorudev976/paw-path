@@ -37,7 +37,8 @@ export const userRepository = {
       if (error.code === 'permission-denied') {
         return null
       }
-      throw error
+      console.error('ユーザ情報取得: findById', error)
+      return null
     }
     
   },
