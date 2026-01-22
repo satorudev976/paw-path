@@ -11,7 +11,7 @@ type UserContextValue = {
 export const UserContext = createContext<UserContextValue | null>(null)
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { authUser } = useAuth()
+  const { authUser, isLoading: authLoading } = useAuth()
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -19,6 +19,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true)
     try {
       const user = await UserService.get(uid)
+      console.log('ユーザー情報取得:', user)
       setUser(user)
     } catch (error) {
       console.error('ユーザー情報取得エラー:', error)
@@ -29,6 +30,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   useEffect(() => {
+    if (authLoading) {
+      setIsLoading(true)
+      return
+    }
+
     if (!authUser) {
       setUser(null)
       setIsLoading(false)
