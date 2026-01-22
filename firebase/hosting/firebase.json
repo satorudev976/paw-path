@@ -1,0 +1,12 @@
+{
+  "hosting": {
+    "site": "paw-path",
+    "public": "public",
+    "rewrites": [
+      {
+        "source": "/verifyInvite",
+        "function": "verifyInvite"
+      }
+    ]
+  }
+}

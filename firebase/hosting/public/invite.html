@@ -213,5 +213,33 @@
       </div>
     </div>
   </div>
+  <script>
+  (function () {
+    const params = new URLSearchParams(window.location.search)
+    const token = params.get("token")
+
+    const messageEl = document.getElementById("message")
+
+    if (!token) {
+      messageEl.textContent = "無効な招待リンクです"
+      return
+    }
+
+    fetch(`/verifyInvite?token=${encodeURIComponent(token)}`)
+      .then(res => res.json())
+      .then(result => {
+        if (!result.ok) {
+          messageEl.textContent = "この招待は使用できません"
+          return
+        }
+
+        // アプリへ遷移（Custom Scheme / Universal Link）
+        window.location.href = `pawpath://invite?token=${encodeURIComponent(token)}`
+      })
+      .catch(() => {
+        messageEl.textContent = "エラーが発生しました"
+      })
+  })()
+  </script>
 </body>
 </html>
