@@ -1,0 +1,18 @@
+{
+  "projects": {
+    "default": "pawpath-dev",
+    "prod": "pawpath-prod"
+  },
+  "targets": {
+    "pawpath-dev": {
+      "hosting": {
+        "web": ["paw-path-dev"]
+      }
+    },
+    "pawpath-prod": {
+      "hosting": {
+        "web": ["paw-path"]
+      }
+    }
+  }
+}
