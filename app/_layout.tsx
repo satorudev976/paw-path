@@ -5,13 +5,18 @@ import { UserProvider } from '@/contexts/user.context';
 import { AppAccessProvider } from '@/contexts/app-access.context';
 import { WalkRecordingProvider } from '@/contexts/walk-recording.context';
 import { Slot } from 'expo-router';
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { initRevenueCat } from '@/infrastructure/revenucat/revenuecat.client'
 
 export default function RootLayout() {
+  const [rcReady, setRcReady] = useState(false)
+
   useEffect(() => {
     initRevenueCat()
+    setRcReady(true)
   }, [])
+
+  if (!rcReady) return
 
   return (
     <AuthProvider>

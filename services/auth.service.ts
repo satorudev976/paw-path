@@ -12,7 +12,6 @@ export const AuthService = {
   },
 
   async logout(): Promise<void> {
-    
     await authRepository.signOut();
   }
 }

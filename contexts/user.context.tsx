@@ -6,7 +6,6 @@ import { User } from '@/domain/entities/user'
 type UserContextValue = {
   user: User | null
   isLoading: boolean
-  refresh: () => Promise<void>
 }
 
 export const UserContext = createContext<UserContextValue | null>(null)
@@ -16,21 +15,30 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  const load = async () => {
-    if (!authUser) return
+  const loadUser = async (uid: string) => {
     setIsLoading(true)
-    const user = await UserService.get(authUser.uid)
-    setUser(user)
-    setIsLoading(false)
+    try {
+      const userData = await UserService.get(uid)
+      setUser(userData)
+    } catch (error) {
+      console.error('ユーザー情報取得エラー:', error)
+      setUser(null)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   useEffect(() => {
-    if (!authUser) return
-    load()
+    if (!authUser) {
+      setUser(null)
+      setIsLoading(false)
+      return
+    }    
+    loadUser(authUser.uid)
   }, [authUser])
 
   return (
-    <UserContext.Provider value={{ user, isLoading, refresh: load }}>
+    <UserContext.Provider value={{ user, isLoading }}>
       {children}
     </UserContext.Provider>
   )

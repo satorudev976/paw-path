@@ -1,14 +1,13 @@
 import {
   createContext,
   useState,
-  useCallback,
+  useEffect,
 } from 'react'
 import { SubscriptionService } from '@/services/subscription.service'
 
 type SubscriptionContextValue = {
   hasEntitlement: boolean
   isLoading: boolean
-  refresh: () => Promise<void>
 }
 
 export const SubscriptionContext =
@@ -20,19 +19,26 @@ export const SubscriptionProvider: React.FC<{
   const [hasEntitlement, setHasEntitlement] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
-  const refresh = useCallback(async () => {
+  const loadSubscription = async () => {
+    setIsLoading(true)
     try {
-      setIsLoading(true)
       const hasPremium = await SubscriptionService.hasPremium()
       setHasEntitlement(hasPremium)
+    } catch (error) {
+      console.error('サブスクリプション状態の取得エラー:', error)
+      setHasEntitlement(false)
     } finally {
       setIsLoading(false)
     }
+  }
+
+  useEffect(() => {
+    loadSubscription()
   }, [])
 
   return (
     <SubscriptionContext.Provider
-      value={{ hasEntitlement, isLoading, refresh }}
+      value={{ hasEntitlement, isLoading }}
     >
       {children}
     </SubscriptionContext.Provider>

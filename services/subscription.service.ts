@@ -7,6 +7,11 @@ export const SubscriptionService = {
   },
 
   async purchasesLogOut() {
+    const isAnonymous = await Purchases.isAnonymous()
+    if (isAnonymous) {
+      console.log('RevenueCat: 匿名ユーザーのためログアウト不要')
+      return
+    }
     await Purchases.logOut()
   },
 

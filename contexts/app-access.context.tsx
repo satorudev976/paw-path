@@ -1,4 +1,4 @@
-import { createContext, useMemo } from 'react'
+import { createContext } from 'react'
 import { useSubscription } from '@/hooks/use-subscription'
 import { useFamily } from '@/hooks/use-family'
 
@@ -21,29 +21,20 @@ export const AppAccessProvider: React.FC<{
 
   const isLoading = subLoading || familyLoading
 
-  const readonly = useMemo(() => {
-    if (!isLoading || !family) return true
-
-    // サブスク契約をしていたら書き込み可能
+  // 読み取り専用かどうかを判定
+  const readonly = (() => {
+    if (isLoading || !family) return true
     if (hasEntitlement) return false
-
-    // オーナーまたは家族のとき、アプリ内期間中であれば書き込み可能
-    if (family.trialEndAt > new Date())
-      return false
-
-    // 上記以外は読み取り専用
+    if (family.trialEndAt > new Date()) return false
     return true
-  }, [hasEntitlement, family, isLoading])
+  })()
 
-  const trialUse = useMemo(() => {
+  // アプリお試し期間中かどうかを判定
+  const trialUse = (() => {
     if (isLoading || !family) return false
-
-    // サブスク契約中はトライアルではない（正規プラン）
     if (hasEntitlement) return false
-
-    // トライアル期間中 = 使用中
     return family.trialEndAt > new Date()
-  }, [hasEntitlement, family, isLoading])
+  })()
 
 
   return (
