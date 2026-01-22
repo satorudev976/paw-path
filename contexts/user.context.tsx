@@ -6,6 +6,7 @@ import { User } from '@/domain/entities/user'
 type UserContextValue = {
   user: User | null
   isLoading: boolean
+  refresh: () => Promise<void>
 }
 
 export const UserContext = createContext<UserContextValue | null>(null)
@@ -43,8 +44,14 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loadUser(authUser.uid)
   }, [authUser])
 
+  const refresh = async () => {
+    if (!authUser) return
+    setIsLoading(true)
+    await loadUser(authUser.uid)
+  }
+
   return (
-    <UserContext.Provider value={{ user, isLoading }}>
+    <UserContext.Provider value={{ user, isLoading, refresh}}>
       {children}
     </UserContext.Provider>
   )
