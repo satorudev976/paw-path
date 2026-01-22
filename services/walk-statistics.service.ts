@@ -2,23 +2,23 @@ import { WalkService } from '@/services/walk.service';
 import { UserService } from '@/services/user.service';
 import { getWeekStart, getWeekEnd, getMonthStart, getMonthEnd} from '@/utils/date';
 
-export interface UserWalkStatistics {
+export interface WalkRanking {
   userId: string;
   nickname: string;
-  count: number;
-  totalDistance: number;
-  totalDuration: number;
+  count: number; // 散歩回数
+  totalDistance: number; // 散歩距離
+  totalDuration: number; // 散歩時間
 }
 
 export const WalkStatisticsService = {
 
 
-  async getWalkFamilyRanking(
+  async getFamilyRanking(
     familyId: string,
     period: 'week' | 'month'
-  ): Promise<UserWalkStatistics[]> {
+  ): Promise<WalkRanking[]> {
     const now = new Date();
-    
+
     const startDate = period === 'week' 
         ? getWeekStart(now)
         : getMonthStart(now);
@@ -49,7 +49,7 @@ export const WalkStatisticsService = {
       statsMap.set(userId, current);
     });
     
-    const statistics: UserWalkStatistics[] = Array.from(statsMap.entries()).map(([userId, stats]) => ({
+    const statistics: WalkRanking[] = Array.from(statsMap.entries()).map(([userId, stats]) => ({
       userId,
       nickname: userMap.get(userId) || '不明',
       count: stats.count,

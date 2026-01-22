@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import ErrorView from '@/components/ui/error';
 import { SkeletonStatCard } from '@/components/ui/skeleton';
-import { WalkStatisticsService, UserWalkStatistics } from '@/services/walk-statistics.service';
+import { WalkStatisticsService, WalkRanking } from '@/services/walk-statistics.service';
 import { useUser } from '@/hooks/use-user';
 import { formatDistance, formatDuration } from '@/utils/formatters';
 
@@ -10,7 +10,7 @@ type Period = 'week' | 'month';
 
 export default function RankingView() {
   const { user } = useUser();
-  const [rankings, setRankings] = useState<UserWalkStatistics[]>([]);
+  const [rankings, setRankings] = useState<WalkRanking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState<Period>('week');
@@ -26,11 +26,11 @@ export default function RankingView() {
     try {
       if (!user) return null ;
   
-      const stats = await WalkStatisticsService.getWalkFamilyRanking(
+      const ranking = await WalkStatisticsService.getFamilyRanking(
         user.familyId,
         selectedPeriod
       )
-      setRankings(stats);
+      setRankings(ranking);
     } catch (err: any) {
       console.error('ランキングデータ取得エラー:', err);
       
