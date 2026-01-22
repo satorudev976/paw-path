@@ -11,10 +11,6 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/users/$(uid));
     }
 
-    function familyDoc(familyId) {
-      return get(/databases/$(database)/documents/families/$(familyId));
-    }
-
     function isOwner() {
       return isSignedIn()
         && userDoc(request.auth.uid).data.role == 'owner';
@@ -63,17 +59,15 @@ service cloud.firestore {
       // 家族なら閲覧可（readOnly でも OK）
       allow read: if belongsToFamily(familyId);
 
-      // 作成：家族 + 書き込み可能状態
+      // 作成：家族 
       allow create: if belongsToFamily(familyId)
-        && familyIsWritable(familyId)
         && request.resource.data.recordedBy == request.auth.uid;
 
       // 更新：禁止（immutable）
       allow update: if false;
 
-      // 削除：記録者のみ + writable
+      // 削除：記録者のみ
       allow delete: if belongsToFamily(familyId)
-        && familyIsWritable(familyId)
         && resource.data.recordedBy == request.auth.uid;
     }
     match /invites/{inviteId} {
