@@ -12,6 +12,7 @@ import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler'
 import { WalkService } from '@/services/walk.service';
 import { useUser } from '@/hooks/use-user';
 import { formatDistance, formatDuration } from '@/utils/formatters';
+import { getWeekStart, getWeekEnd, getMonthStart, getMonthEnd} from '@/utils/date';
 
 type Period = 'week' | 'month';
 
@@ -49,12 +50,17 @@ export default function StatsView() {
       if (!user) return ;
   
       const now = new Date();
-      const startDate = new Date(now);
-      startDate.setDate(startDate.getDate() - (selectedPeriod === 'week' ? 7 : 30));
+      const startDate = selectedPeriod === 'week' 
+        ? getWeekStart(now)
+        : getMonthStart(now);
+
+      const endDate = selectedPeriod === 'week' 
+        ? getWeekEnd(now)
+        : getMonthEnd(now);
       const walksData = await WalkService.listByDateRange(
         user.familyId,
         startDate,
-        now
+        endDate
       )
       console.log(`${selectedPeriod}の散歩データ:`, walksData.length);
       setWalks(walksData);

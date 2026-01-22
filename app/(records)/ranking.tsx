@@ -5,6 +5,7 @@ import { SkeletonStatCard } from '@/components/ui/skeleton';
 import { WalkStatisticsService, UserWalkStatistics } from '@/services/walk-statistics.service';
 import { useUser } from '@/hooks/use-user';
 import { formatDistance, formatDuration } from '@/utils/formatters';
+
 type Period = 'week' | 'month';
 
 export default function RankingView() {
@@ -24,14 +25,10 @@ export default function RankingView() {
     
     try {
       if (!user) return null ;
-
-      const now = new Date();
-      const startDate = new Date(now);
-      startDate.setDate(startDate.getDate() - (selectedPeriod === 'week' ? 7 : 30));
+  
       const stats = await WalkStatisticsService.getWalkFamilyRanking(
         user.familyId,
-        startDate,
-        now
+        selectedPeriod
       )
       setRankings(stats);
     } catch (err: any) {
