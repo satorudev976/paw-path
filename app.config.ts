@@ -43,7 +43,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
           {
             CFBundleURLSchemes: [
               "pawpath",
-              "1079866305602-vsc5ecoo9rglrgh1e3d5ha5sj44uu1gj.apps.googleusercontent.com",
+              "com.googleusercontent.apps.1079866305602-vsc5ecoo9rglrgh1e3d5ha5sj44uu1gj",
             ],
           },
         ],
