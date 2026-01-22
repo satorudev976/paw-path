@@ -20,6 +20,7 @@ import { useUser } from '@/hooks/use-user';
 import { UserService } from '@/services/user.service';
 import { User } from '@/domain/entities/user';
 import { InviteService } from '@/services/invite.service';
+import { privacyUrl, supportUrl, termsUrl } from '@/constants/site';
 
 const WEB_BASE_URL = 'https://paw-path-63154.web.app';
 
@@ -270,7 +271,7 @@ export default function OwnwerSettingsScreen() {
         
         <TouchableOpacity 
           style={styles.aboutLink}
-          onPress={() => Linking.openURL('https://paw-path-63154.web.app/privacy.html')}
+          onPress={() => Linking.openURL(privacyUrl)}
         >
           <Ionicons name="shield-checkmark-outline" size={24} color="#666666" />
           <Text style={styles.aboutLinkText}>プライバシーポリシー</Text>
@@ -279,7 +280,7 @@ export default function OwnwerSettingsScreen() {
         
         <TouchableOpacity 
           style={styles.aboutLink}
-          onPress={() => Linking.openURL('https://paw-path-63154.web.app/terms.html')}
+          onPress={() => Linking.openURL(termsUrl)}
         >
           <Ionicons name="document-text-outline" size={24} color="#666666" />
           <Text style={styles.aboutLinkText}>利用規約</Text>
@@ -288,7 +289,7 @@ export default function OwnwerSettingsScreen() {
         
         <TouchableOpacity 
           style={styles.aboutLink}
-          onPress={() => Linking.openURL('https://paw-path-63154.web.app/support.html')}
+          onPress={() => Linking.openURL(supportUrl)}
         >
           <Ionicons name="help-circle-outline" size={24} color="#666666" />
           <Text style={styles.aboutLinkText}>サポート・ヘルプ</Text>

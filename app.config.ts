@@ -139,6 +139,12 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         iosKey: process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY
       },
 
+      hosting: {
+        privacyUrl: process.env.EXPO_PUBLIC_PRIVACY_URL,
+        supportUrl: process.env.EXPO_PUBLIC_SUPPORT_URL,
+        termsUrl: process.env.EXPO_PUBLIC_TERMS_URL,
+      },
+
       eas: {
         projectId: "d8217194-1634-43f6-9fa9-1be90cb3530f",
       },

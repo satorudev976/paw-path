@@ -14,6 +14,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { UserService } from '@/services/user.service';
 import { User } from '@/domain/entities/user';
 import { useUser } from '@/hooks/use-user';
+import { privacyUrl, supportUrl, termsUrl } from '@/constants/site';
 
 export default function FamilySettingsScreen() {
   const router = useRouter();
@@ -103,7 +104,7 @@ export default function FamilySettingsScreen() {
         <Text style={styles.sectionTitle}>アプリについて</Text>
         <TouchableOpacity 
           style={styles.aboutLink}
-          onPress={() => Linking.openURL('https://paw-path-63154.web.app/privacy.html')}
+          onPress={() => Linking.openURL(privacyUrl)}
         >
           <Ionicons name="shield-checkmark-outline" size={24} color="#666666" />
           <Text style={styles.aboutLinkText}>プライバシーポリシー</Text>
@@ -112,7 +113,7 @@ export default function FamilySettingsScreen() {
         
         <TouchableOpacity 
           style={styles.aboutLink}
-          onPress={() => Linking.openURL('https://paw-path-63154.web.app/terms.html')}
+          onPress={() => Linking.openURL(termsUrl)}
         >
           <Ionicons name="document-text-outline" size={24} color="#666666" />
           <Text style={styles.aboutLinkText}>利用規約</Text>
@@ -121,7 +122,7 @@ export default function FamilySettingsScreen() {
         
         <TouchableOpacity 
           style={styles.aboutLink}
-          onPress={() => Linking.openURL('https://paw-path-63154.web.app/support.html')}
+          onPress={() => Linking.openURL(supportUrl)}
         >
           <Ionicons name="help-circle-outline" size={24} color="#666666" />
           <Text style={styles.aboutLinkText}>サポート・ヘルプ</Text>
