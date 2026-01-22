@@ -17,60 +17,7 @@ import { WEEKDAY_COLORS, applyOpacity } from '@/utils/color'
 import { formatDateKey, getWeekStart, getWeekEnd } from '@/utils/date';
 import { useUser } from '@/hooks/use-user';
 import { useRouteAnimation } from '@/hooks/root-animation';
-// 同日の散歩にインデックスを付与した拡張型
-interface WalkWithIndex extends Walk {
-  sameDayIndex: number;
-  sameDayTotal: number;
-  color: string;
-  opacity: number; // ✅ 透明度を追加
-}
-
-// 同日の散歩を時系列順にソートしてインデックスを付与
-function assignSameDayIndices(walks: Walk[]): WalkWithIndex[] {
-  // 日付ごとにグループ化
-  const walksByDate = new Map<string, Walk[]>();
-  
-  walks.forEach(walk => {
-    const dateKey = formatDateKey(walk.startTime);
-    if (!walksByDate.has(dateKey)) {
-      walksByDate.set(dateKey, []);
-    }
-    walksByDate.get(dateKey)!.push(walk);
-  });
-
-  // 各日付内で時系列順にソート
-  walksByDate.forEach(dayWalks => {
-    dayWalks.sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
-  });
-
-  // インデックスと色、透明度を付与
-  return walks.map(walk => {
-    const dateKey = formatDateKey(walk.startTime);
-    const dayWalks = walksByDate.get(dateKey)!;
-    const sameDayIndex = dayWalks.findIndex(w => w.walkId === walk.walkId);
-    const sameDayTotal = dayWalks.length;
-    
-    // 曜日の基本色を取得
-    const dayOfWeek = walk.startTime.getDay();
-    const baseColor = WEEKDAY_COLORS[dayOfWeek];
-    
-    let opacity = 1.0;
-    if (sameDayTotal > 1) {
-      // 1回目は100%、2回目以降は透明度を下げる
-      opacity = 1.0 - (sameDayIndex * 0.12);
-      // 最低でも30%の透明度を保つ
-      opacity = Math.max(0.3, opacity);
-    }
-    
-    return {
-      ...walk,
-      sameDayIndex,
-      sameDayTotal,
-      color: baseColor, // 色はそのまま
-      opacity,          // 透明度を追加
-    };
-  });
-}
+import { WalkMapService } from '@/services/walk-map.service';
 
 export default function MapScreen() {
   const { user } = useUser();
@@ -224,7 +171,7 @@ export default function MapScreen() {
   const weekEnd = getWeekEnd(currentWeekStart);
   
   // 同日内でインデックスと色を付与
-  const walksWithIndex = assignSameDayIndices(walks);
+  const walksForMap = WalkMapService.enrich(walks)
 
   return (
     <View style={styles.container}>
@@ -266,7 +213,7 @@ export default function MapScreen() {
             style={styles.map}
             initialRegion={getMapRegion()}
           >
-            {walksWithIndex.map((walk) => {
+            {walksForMap.map((walk) => {
               const isAnimating = animatingWalkId === walk.walkId;
               const mainStrokeWidth = isAnimating ? 5 : 3;
               const outlineStrokeWidth = isAnimating ? 6 : 4;  // 縁は4px太く（両側2pxずつ見える）
