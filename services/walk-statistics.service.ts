@@ -1,6 +1,5 @@
 import { WalkService } from '@/services/walk.service';
 import { UserService } from '@/services/user.service';
-import { getWeekStart, getWeekEnd, getMonthStart, getMonthEnd} from '@/utils/date';
 
 export interface WalkRanking {
   userId: string;
@@ -10,24 +9,48 @@ export interface WalkRanking {
   totalDuration: number; // 散歩時間
 }
 
+export interface WalkStats {
+  count: number;
+  totalDistance: number;
+  avgDistance: number;
+  avgDuration: number;
+}
+
 export const WalkStatisticsService = {
+
+  async getStatisicsByFamily(
+    familyId: string,
+    period: 'week' | 'month'
+  ): Promise<WalkStats> {
+
+    const walks = await WalkService.listByPeriod(familyId, period);
+
+    if (walks.length === 0) {
+      return {
+        count: 0,
+        totalDistance: 0,
+        avgDistance: 0,
+        avgDuration: 0,
+      }
+    }
+
+    const totalDistance = walks.reduce((sum, walk) => sum + walk.distanceMeter, 0);
+    const totalDuration = walks.reduce((sum, walk) => sum + walk.durationSec, 0);
+
+    return {
+      count: walks.length,
+      totalDistance: totalDistance,
+      avgDistance: totalDistance / walks.length,
+      avgDuration: totalDuration / walks.length,
+    }
+  },
 
 
   async getFamilyRanking(
     familyId: string,
     period: 'week' | 'month'
   ): Promise<WalkRanking[]> {
-    const now = new Date();
-
-    const startDate = period === 'week' 
-        ? getWeekStart(now)
-        : getMonthStart(now);
-
-    const endDate = period === 'week' 
-      ? getWeekEnd(now)
-      : getMonthEnd(now);
-
-    const walks = await WalkService.listByDateRange(familyId, startDate, endDate);
+    const walks = await WalkService.listByPeriod(familyId, period);
 
     const users = await UserService.getFamilyUsers(familyId);
     const userMap = new Map(users.map(u => [u.id, u.nickname]));

@@ -1,13 +1,23 @@
 import { Walk } from "@/domain/entities/walk";
 import { walkRepository } from "@/infrastructure/firebase/repositories/walk.repository";
+import { getWeekStart, getWeekEnd, getMonthStart, getMonthEnd} from '@/utils/date';
 
 export const WalkService = {
 
-  async listByDateRange(
+  async listByPeriod(
     familyId: string,
-    startDate: Date,
-    endDate: Date,
+    period: 'week' | 'month'
   ): Promise<Walk[]> {
+    const now = new Date();
+
+    const startDate = period === 'week' 
+      ? getWeekStart(now)
+      : getMonthStart(now);
+
+    const endDate = period === 'week' 
+      ? getWeekEnd(now)
+      : getMonthEnd(now);
+
     const walks = await walkRepository.getWalksByDateRange(
       familyId, startDate, endDate
     );

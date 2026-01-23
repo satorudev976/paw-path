@@ -12,7 +12,8 @@ import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler'
 import { WalkService } from '@/services/walk.service';
 import { useUser } from '@/hooks/use-user';
 import { formatDistance, formatDuration } from '@/utils/formatters';
-import { getWeekStart, getWeekEnd, getMonthStart, getMonthEnd} from '@/utils/date';
+import { WalkStats } from '@/services/walk-statistics.service';
+import { WalkStatisticsService } from '@/services/walk-statistics.service';
 
 type Period = 'week' | 'month';
 
@@ -24,7 +25,7 @@ export default function StatsView() {
   const [error, setError] = useState<string | null>(null);
   const { toast, showToast, hideToast } = useToast();
   const router = useRouter();
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<WalkStats>({
     count: 0,
     totalDistance: 0,
     avgDistance: 0,
@@ -48,23 +49,17 @@ export default function StatsView() {
     try {
 
       if (!user) return ;
-  
-      const now = new Date();
-      const startDate = selectedPeriod === 'week' 
-        ? getWeekStart(now)
-        : getMonthStart(now);
-
-      const endDate = selectedPeriod === 'week' 
-        ? getWeekEnd(now)
-        : getMonthEnd(now);
-      const walksData = await WalkService.listByDateRange(
+      const walks = await WalkService.listByPeriod(
         user.familyId,
-        startDate,
-        endDate
+        selectedPeriod
       )
-      console.log(`${selectedPeriod}の散歩データ:`, walksData.length);
-      setWalks(walksData);
-      calculateStats(walksData);
+      setWalks(walks);
+  
+      const stats = await WalkStatisticsService.getStatisicsByFamily(
+        user.familyId,
+        selectedPeriod
+      )
+      setStats(stats)
     } catch (err: any) {
       console.error('統計データ取得エラー:', err);
       
@@ -77,28 +72,6 @@ export default function StatsView() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const calculateStats = (walksData: Walk[]) => {
-    if (walksData.length === 0) {
-      setStats({
-        count: 0,
-        totalDistance: 0,
-        avgDistance: 0,
-        avgDuration: 0,
-      });
-      return;
-    }
-
-    const totalDistance = walksData.reduce((sum, walk) => sum + walk.distanceMeter, 0);
-    const totalDuration = walksData.reduce((sum, walk) => sum + walk.durationSec, 0);
-
-    setStats({
-      count: walksData.length,
-      totalDistance: totalDistance,
-      avgDistance: totalDistance / walksData.length,
-      avgDuration: totalDuration / walksData.length,
-    });
   };
 
   const handleWalkPress = (walk: Walk) => {
@@ -140,13 +113,8 @@ export default function StatsView() {
               console.log('散歩記録削除:', walk.walkId);
               
               await WalkService.delete(walk.walkId);
-              
-              // ローカルステートから削除
-              const updatedWalks = walks.filter(w => w.walkId !== walk.walkId);
-              setWalks(updatedWalks);
-              
               // 統計を再計算
-              calculateStats(updatedWalks);
+              //calculateStats(updatedWalks);
               
               showToast('記録を削除しました', 'success');
             } catch (error) {
