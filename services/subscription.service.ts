@@ -22,6 +22,24 @@ export const SubscriptionService = {
     )
   },
 
+  async getActivePackage(): Promise<'monthly' | 'annual' | null> {
+    const info = await Purchases.getCustomerInfo()
+    const activeEntitlements = info.entitlements.active
+    if (Object.keys(activeEntitlements).length === 0) {
+      return null
+    }
+
+    const entitlement = Object.values(activeEntitlements)[0]
+    const productId = entitlement.productIdentifier
+    console.log('現在のプラン:', productId)
+    if (productId.includes('monthly')) {
+      return 'monthly'
+    } else if (productId.includes('annual')) {
+      return 'annual'
+    }
+    return null
+  },
+
   async purchasePackage(packageToPurchase: PurchasesPackage): Promise<boolean> {
     const { customerInfo } =
     await Purchases.purchasePackage(packageToPurchase)
