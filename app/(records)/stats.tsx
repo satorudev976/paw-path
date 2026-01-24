@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/toast';
 import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
 import { WalkService } from '@/services/walk.service';
 import { useUser } from '@/hooks/use-user';
-import { formatDistance, formatDuration } from '@/utils/formatters';
+import { formatDistance, formatDurationJa } from '@/utils/formatters';
 import { WalkStats } from '@/services/walk-statistics.service';
 import { WalkStatisticsService } from '@/services/walk-statistics.service';
 
@@ -227,7 +227,7 @@ export default function StatsView() {
           <View style={styles.statCard}>
             <Text style={styles.statIcon}>⏱️</Text>
             <Text style={styles.statLabel}>平均所要時間</Text>
-            <Text style={styles.statValue}>{formatDuration(stats.avgDuration)}</Text>
+            <Text style={styles.statValue}>{formatDurationJa(stats.avgDuration)}</Text>
           </View>
 
           {/* 散歩履歴 */}
@@ -263,7 +263,7 @@ export default function StatsView() {
                   </View>
                   <View style={styles.historyStats}>
                     <Text style={styles.historyDistance}>{formatDistance(walk.distanceMeter)}km</Text>
-                    <Text style={styles.historyDuration}>{formatDuration(walk.durationSec)}</Text>
+                    <Text style={styles.historyDuration}>{formatDurationJa(walk.durationSec)}</Text>
                   </View>
                   <Ionicons name="chevron-forward" size={24} color="#CCCCCC" />
                 </TouchableOpacity>

@@ -27,7 +27,7 @@ export const WalkRecordingProvider = ({ children }: { children: ReactNode }) => 
   const [currentSpeed, setCurrentSpeed] = useState(0);
 
   const startTimeRef = useRef<Date | null>(null);
-  const intervalRef = useRef<number | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const startRecording = async () => {
     try {
@@ -70,7 +70,7 @@ export const WalkRecordingProvider = ({ children }: { children: ReactNode }) => 
       // 経過時間カウント開始
       intervalRef.current = setInterval(() => {
         setDuration((prev) => prev + 1);
-      }, 1000) as unknown as number;
+      }, 1000);
 
       setState('recording');
     } catch (error) {

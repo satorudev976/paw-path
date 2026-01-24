@@ -2,7 +2,7 @@ import { useWalkRecording } from '@/hooks/use-walk-recording'
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useRef } from 'react';
 import { Animated, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { formatDistance, formatDuration } from '@/utils/formatters';
+import { formatDistance, formatDurationHMS } from '@/utils/formatters';
 import Toast from '@/components/ui/toast';
 import { useToast } from '@/hooks/toast';
 
@@ -61,14 +61,14 @@ export function RecordingState() {
                 <Ionicons name="time-outline" size={28} color="#4A90E2" />
               </View>
               <Text style={styles.statLabel}>経過時間</Text>
-              <Text style={styles.statValueLarge}>{formatDuration(duration)}</Text>
+              <Text style={styles.statValueLarge}>{formatDurationHMS(duration)}</Text>
             </View>
 
             <View style={styles.statRow}>
               <View style={styles.statCardSmall}>
                 <Ionicons name="trending-up-outline" size={24} color="#50C878" />
                 <Text style={styles.statLabelSmall}>距離</Text>
-                <Text style={styles.statValueSmall}>{formatDistance(distance)}</Text>
+                <Text style={styles.statValueSmall}>{formatDistance(distance, 2)}</Text>
                 <Text style={styles.statUnit}>km</Text>
               </View>
 

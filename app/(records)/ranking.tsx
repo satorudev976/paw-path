@@ -4,7 +4,7 @@ import ErrorView from '@/components/ui/error';
 import { SkeletonStatCard } from '@/components/ui/skeleton';
 import { WalkStatisticsService, WalkRanking } from '@/services/walk-statistics.service';
 import { useUser } from '@/hooks/use-user';
-import { formatDistance, formatDuration } from '@/utils/formatters';
+import { formatDistance, formatDurationJa } from '@/utils/formatters';
 
 type Period = 'week' | 'month';
 
@@ -125,7 +125,7 @@ export default function RankingView() {
 
                 <View style={styles.statItem}>
                   <Text style={styles.statLabel}>総時間</Text>
-                  <Text style={styles.statValue}>{formatDuration(user.totalDuration)}</Text>
+                  <Text style={styles.statValue}>{formatDurationJa(user.totalDuration)}</Text>
                 </View>
               </View>
             </View>
