@@ -25,6 +25,12 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       policy: "appVersion"
     },
 
+    splash: {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+
     ios: {
       locales: {
         ja: {
@@ -82,13 +88,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 
     plugins: [
       "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          image: "./assets/images/splash-icon.png",
-          resizeMode: "cover",
-        },
-      ],
       [
         "expo-location",
         {
