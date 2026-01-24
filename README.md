@@ -41,3 +41,15 @@ firebase deploy --only hosting
 firebase use prod
 firebase deploy --only hosting
 ```
+
+## functionデプロイ Dev
+```
+firebase use default
+firebase deploy --only functions
+```
+
+## functionデプロイ Prod
+```
+firebase use prod
+firebase deploy --only functions
+```
