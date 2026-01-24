@@ -105,9 +105,7 @@ export function RecordingState() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: '#F8F9FA',
   },
   scrollContainer: {
     flex: 1,
