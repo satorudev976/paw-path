@@ -4,6 +4,17 @@ import { getWeekStart, getWeekEnd, getMonthStart, getMonthEnd} from '@/utils/dat
 
 export const WalkService = {
 
+  async listByDateRange(
+    familyId: string,
+    startDate: Date,
+    endDate: Date
+  ): Promise<Walk[]> {
+    const walks = await walkRepository.getWalksByDateRange(
+      familyId, startDate, endDate
+    );
+    return walks;
+  },
+
   async listByPeriod(
     familyId: string,
     period: 'week' | 'month'
