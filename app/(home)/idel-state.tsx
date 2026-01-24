@@ -107,7 +107,7 @@ export default function IdleState({ showToast }: IdleStateProps) {
         </View>
 
         <Text style={styles.title}>ぱうぱす</Text>
-        <Text style={styles.subtitle}>家族みんなで、愛犬の足跡を残そう</Text>
+        <Text style={styles.subtitle}>毎日の散歩を思い出に。</Text>
 
         <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
           <TouchableOpacity 
