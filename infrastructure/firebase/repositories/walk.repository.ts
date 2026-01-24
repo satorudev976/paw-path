@@ -67,8 +67,8 @@ export const walkRepository = {
     });
   },
 
-  async deleteWalk(walkId: string): Promise<void> {
-    const walkRef = doc(db, 'walks', walkId);
+  async deleteWalk(familyId: string, walkId: string): Promise<void> {
+    const walkRef = doc(db, 'families', familyId, 'walks', walkId);
     await deleteDoc(walkRef);
   }
 }

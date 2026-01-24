@@ -42,7 +42,7 @@ export const WalkService = {
     await walkRepository.addWalk(walk)
   },
 
-  async delete(walkId: string): Promise<void> {
-    await walkRepository.deleteWalk(walkId);
+  async delete(familyId: string, walkId: string): Promise<void> {
+    await walkRepository.deleteWalk(familyId, walkId);
   }
 }

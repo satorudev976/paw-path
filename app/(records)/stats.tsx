@@ -112,10 +112,8 @@ export default function StatsView() {
             try {
               console.log('散歩記録削除:', walk.walkId);
               
-              await WalkService.delete(walk.walkId);
-              // 統計を再計算
-              //calculateStats(updatedWalks);
-              
+              await WalkService.delete(walk.familyId, walk.walkId);
+              await loadStats();
               showToast('記録を削除しました', 'success');
             } catch (error) {
               console.error('削除エラー:', error);
