@@ -138,6 +138,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         privacyUrl: process.env.EXPO_PUBLIC_PRIVACY_URL,
         supportUrl: process.env.EXPO_PUBLIC_SUPPORT_URL,
         termsUrl: process.env.EXPO_PUBLIC_TERMS_URL,
+        inviteUrl: process.env.EXPO_PUBLIC_INVITE_URL,
       },
 
       eas: {

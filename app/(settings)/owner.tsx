@@ -14,15 +14,12 @@ import {
   Platform,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-// import { createInviteLink } from '../../src/services/inviteService';
 import { useAppAccess } from '@/hooks/use-app-access';
 import { useUser } from '@/hooks/use-user';
 import { UserService } from '@/services/user.service';
 import { User } from '@/domain/entities/user';
 import { InviteService } from '@/services/invite.service';
-import { privacyUrl, supportUrl, termsUrl } from '@/constants/site';
-
-const WEB_BASE_URL = 'https://paw-path-63154.web.app';
+import { privacyUrl, supportUrl, termsUrl, inviteUrl } from '@/constants/site';
 
 export default function OwnwerSettingsScreen() {
   const router = useRouter();
@@ -58,11 +55,11 @@ export default function OwnwerSettingsScreen() {
 
   const handleInvite = async () => {
     const token = await InviteService.createInvite();
-    const inviteUrl = `${WEB_BASE_URL}/join.html?token=${token}`;
-    const shareMessage = `「ぱうぱす」への招待です。家族みんなで、愛犬の足跡を残そう！\n\n下のリンクをタップするだけで簡単に参加できます：\n${inviteUrl}\n\n※このリンクは24時間有効です`;
+    const url = `${inviteUrl}?token=${token}`;
+    const shareMessage = `「ぱうぱす」への招待です。\n\n下のリンクをタップするだけで簡単に参加できます：\n${url}\n\n※このリンクは24時間有効です`;
     await Share.share({
       message: shareMessage,
-      title: 'PawPathに招待',
+      title: 'ぱうぱすに招待',
     });
   };
 
