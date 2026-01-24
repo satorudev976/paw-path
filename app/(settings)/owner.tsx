@@ -211,7 +211,7 @@ export default function OwnwerSettingsScreen() {
                     styles.shareButton,
                     members.length >= 5 && styles.shareButtonDisabled
                   ]}
-                  onPress={members.length <= 5 ? undefined : handleInvite}
+                  onPress={members.length < 5 ? handleInvite : undefined}
                   disabled={members.length >= 5}
                 >
                   <Ionicons 
@@ -238,7 +238,7 @@ export default function OwnwerSettingsScreen() {
                 )}
 
                 {/* ヘルプメッセージ */}
-                {members.length <= 5 && (
+                {members.length < 5 && (
                   <View style={styles.helpBox}>
                     <Text style={styles.helpText}>
                       「家族を招待」ボタンをタップして、メールやSMSなどで招待リンクを送信してください。家族がリンクをタップするだけで参加できます!
