@@ -6,16 +6,17 @@ import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { Animated, Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Toast from '@/components/ui/toast';
-import { useToast } from '@/hooks/toast';
 import { useLocationPermission } from '@/hooks/location-permission';
 
-export function IdleState() {
+interface IdleStateProps {
+  showToast: (message: string, type: 'success' | 'error' | 'info') => void;
+}
+
+export function IdleState({ showToast }: IdleStateProps) {
   const { readonly } = useAppAccess();
   const { startRecording } = useWalkRecording();
   const router = useRouter();
   const { canGps } = useLocationPermission();
-  const { toast, showToast, hideToast } = useToast();
 
   const glowAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.95)).current;
@@ -130,13 +131,6 @@ export function IdleState() {
           <Text style={styles.hintText}>位置情報を記録して家族と共有します</Text>
         </View>
       </View>
-
-      <Toast
-        message={toast.message}
-        type={toast.type}
-        visible={toast.visible}
-        onHide={hideToast}
-      />
     </View>
   );
 }
