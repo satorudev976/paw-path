@@ -8,7 +8,7 @@ interface RecordingStateProps {
   showToast: (message: string, type: 'success' | 'error' | 'info') => void;
 }
 
-export function RecordingState({ showToast }: RecordingStateProps) {
+export default function RecordingState({ showToast }: RecordingStateProps) {
   const { stopRecording, distance, duration, currentSpeed } = useWalkRecording();
   const blink = useRef(new Animated.Value(1)).current;
 

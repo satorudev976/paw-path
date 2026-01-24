@@ -12,7 +12,7 @@ interface IdleStateProps {
   showToast: (message: string, type: 'success' | 'error' | 'info') => void;
 }
 
-export function IdleState({ showToast }: IdleStateProps) {
+export default function IdleState({ showToast }: IdleStateProps) {
   const { readonly } = useAppAccess();
   const { startRecording } = useWalkRecording();
   const router = useRouter();
