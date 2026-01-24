@@ -5,6 +5,11 @@ import { SkeletonStatCard } from '@/components/ui/skeleton';
 import { WalkStatisticsService, WalkRanking } from '@/services/walk-statistics.service';
 import { useUser } from '@/hooks/use-user';
 import { formatDistance, formatDurationJa } from '@/utils/formatters';
+import DateRangeHeader from '@/components/ui/date-range-header';
+import { useDateRangeNavigator } from '@/hooks/date-range-navigator';
+import { getWeekStart, getWeekEnd, getMonthStart, getMonthEnd } from '@/utils/date';
+import { WalkService } from '@/services/walk.service';
+import { UserService } from '@/services/user.service';
 
 type Period = 'week' | 'month';
 
@@ -14,10 +19,22 @@ export default function RankingView() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState<Period>('week');
+  const {
+    startDate,
+    endDate,
+    currentDate,
+    handlePrevious,
+    handleNext,
+    resetToToday,
+  } = useDateRangeNavigator({
+    period: selectedPeriod,
+    getStartDate: selectedPeriod === 'week' ? getWeekStart : getMonthStart,
+    getEndDate: selectedPeriod === 'week' ? getWeekEnd : getMonthEnd,
+  });
 
   useEffect(() => {
     loadRankings();
-  }, [selectedPeriod]);
+  }, [selectedPeriod, currentDate]);
 
   const loadRankings = async () => {
     setIsLoading(true);
@@ -25,11 +42,14 @@ export default function RankingView() {
     
     try {
       if (!user) return null ;
-  
-      const ranking = await WalkStatisticsService.getFamilyRanking(
+
+      const walks = await WalkService.listByDateRange(
         user.familyId,
-        selectedPeriod
-      )
+        startDate,
+        endDate
+      );
+      const users = await UserService.getFamilyUsers(user.familyId);
+      const ranking = WalkStatisticsService.calculateRanking(walks, users)
       setRankings(ranking);
     } catch (err: any) {
       console.error('ランキングデータ取得エラー:', err);
@@ -50,7 +70,10 @@ export default function RankingView() {
       <View style={styles.tabs}>
         <TouchableOpacity
           style={[styles.tab, selectedPeriod === 'week' && styles.activeTab]}
-          onPress={() => setSelectedPeriod('week')}
+          onPress={() => {
+            setSelectedPeriod('week');
+            resetToToday();
+          }}
         >
           <Text style={[styles.tabText, selectedPeriod === 'week' && styles.activeTabText]}>
             週間
@@ -58,7 +81,10 @@ export default function RankingView() {
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.tab, selectedPeriod === 'month' && styles.activeTab]}
-          onPress={() => setSelectedPeriod('month')}
+          onPress={() => {
+            setSelectedPeriod('month');
+            resetToToday();
+          }}
         >
           <Text style={[styles.tabText, selectedPeriod === 'month' && styles.activeTabText]}>
             月間
@@ -66,12 +92,13 @@ export default function RankingView() {
         </TouchableOpacity>
       </View>
 
-      {/* 期間表示 */}
-      <View style={styles.periodInfo}>
-        <Text style={styles.periodText}>
-          {selectedPeriod === 'week' ? '過去7日間' : '過去30日間'}
-        </Text>
-      </View>
+      {/* 期間ヘッダー */}
+      <DateRangeHeader
+        startDate={startDate}
+        endDate={endDate}
+        onPrevious={handlePrevious}
+        onNext={handleNext}
+      />
 
       {/* コンテンツ */}
       {error ? (
@@ -158,18 +185,6 @@ const styles = StyleSheet.create({
   activeTabText: {
     color: '#FFFFFF',
     fontWeight: 'bold',
-  },
-  periodInfo: {
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#EEEEEE',
-  },
-  periodText: {
-    fontSize: 14,
-    color: '#666666',
-    textAlign: 'center',
   },
   content: {
     flex: 1,

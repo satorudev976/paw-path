@@ -1,5 +1,5 @@
-import { WalkService } from '@/services/walk.service';
-import { UserService } from '@/services/user.service';
+import { Walk } from '@/domain/entities/walk';
+import { User } from '@/domain/entities/user';
 
 export interface WalkRanking {
   userId: string;
@@ -18,20 +18,17 @@ export interface WalkStats {
 
 export const WalkStatisticsService = {
 
-  async getStatisicsByFamily(
-    familyId: string,
-    period: 'week' | 'month'
-  ): Promise<WalkStats> {
-
-    const walks = await WalkService.listByPeriod(familyId, period);
-
+  /**
+   * 散歩データから統計を計算
+   */
+  calculateStats(walks: Walk[]): WalkStats {
     if (walks.length === 0) {
       return {
         count: 0,
         totalDistance: 0,
         avgDistance: 0,
         avgDuration: 0,
-      }
+      };
     }
 
     const totalDistance = walks.reduce((sum, walk) => sum + walk.distanceMeter, 0);
@@ -42,20 +39,18 @@ export const WalkStatisticsService = {
       totalDistance: totalDistance,
       avgDistance: totalDistance / walks.length,
       avgDuration: totalDuration / walks.length,
-    }
+    };
   },
 
 
-  async getFamilyRanking(
-    familyId: string,
-    period: 'week' | 'month'
-  ): Promise<WalkRanking[]> {
-    const walks = await WalkService.listByPeriod(familyId, period);
-
-    const users = await UserService.getFamilyUsers(familyId);
+    /**
+   * 散歩データと家族ユーザーからランキングを計算
+   */
+  calculateRanking(walks: Walk[], users: User[]): WalkRanking[] {
     const userMap = new Map(users.map(u => [u.id, u.nickname]));
 
-    const statsMap = new Map<string, { count: number; totalDistance: number; totalDuration: number }>()
+    const statsMap = new Map<string, { count: number; totalDistance: number; totalDuration: number }>();
+    
     walks.forEach((walk) => {
       const userId = walk.recordedBy || 'unknown';
       
@@ -72,7 +67,7 @@ export const WalkStatisticsService = {
       statsMap.set(userId, current);
     });
     
-    const statistics: WalkRanking[] = Array.from(statsMap.entries()).map(([userId, stats]) => ({
+    const rankings: WalkRanking[] = Array.from(statsMap.entries()).map(([userId, stats]) => ({
       userId,
       nickname: userMap.get(userId) || '不明',
       count: stats.count,
@@ -81,7 +76,7 @@ export const WalkStatisticsService = {
     }));
     
     // 総距離でソート
-    statistics.sort((a, b) => b.totalDistance - a.totalDistance);
-    return statistics
-  }
+    rankings.sort((a, b) => b.totalDistance - a.totalDistance);
+    return rankings;
+  },
 }

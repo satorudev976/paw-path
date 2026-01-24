@@ -3,7 +3,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
@@ -14,17 +13,29 @@ import { WalkService } from '@/services/walk.service';
 import { Walk } from '@/domain/entities/walk';
 import { useFocusEffect } from '@react-navigation/native';
 import { WEEKDAY_COLORS, applyOpacity } from '@/utils/color'
-import { formatDate, getWeekStart, getWeekEnd } from '@/utils/date';
+import { getWeekStart, getWeekEnd } from '@/utils/date';
 import { useUser } from '@/hooks/use-user';
 import { useRouteAnimation } from '@/hooks/root-animation';
 import { WalkMapService } from '@/services/walk-map.service';
+import DateRangeHeader from '@/components/ui/date-range-header';
+import { useDateRangeNavigator } from '@/hooks/date-range-navigator';
 
 export default function MapScreen() {
   const { user } = useUser();
   const [walks, setWalks] = useState<Walk[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentWeekStart, setCurrentWeekStart] = useState<Date>(getWeekStart(new Date()));
+  const {
+    startDate,
+    endDate,
+    currentDate,
+    handlePrevious,
+    handleNext,
+  } = useDateRangeNavigator({
+    period: 'week',
+    getStartDate: getWeekStart,
+    getEndDate: getWeekEnd,
+  });
 
   // アニメーション関連の状態
   const mapRef = useRef<MapView>(null)
@@ -48,9 +59,8 @@ export default function MapScreen() {
       const walkWeekStart = getWeekStart(walkDate);
       
       // 現在表示中の週と異なる場合のみ変更
-      if (currentWeekStart.getTime() !== walkWeekStart.getTime()) {
+      if (currentDate.getTime() !== walkWeekStart.getTime()) {
         console.log('パラメータの日付から週を設定:', walkDate, '→', walkWeekStart);
-        setCurrentWeekStart(walkWeekStart);
         resetAnimationKey(); // アニメーションフラグをリセット
       }
     }
@@ -60,7 +70,7 @@ export default function MapScreen() {
     React.useCallback(() => {
       console.log('地図タブにフォーカス - 最新データを取得');
       loadWalks();
-    }, [currentWeekStart])
+    }, [currentDate])
   );
   // データ取得後、アニメーションを開始
   useEffect(() => {
@@ -86,14 +96,13 @@ export default function MapScreen() {
       if (!user) return;
       setWalks([]);
       setIsLoading(false);
-      const weekEnd = getWeekEnd(currentWeekStart);
-      console.log('散歩データ取得:', currentWeekStart, '〜', weekEnd);
-      const walksData = await WalkService.listByDateRange(
+      console.log('散歩データ取得:', startDate, '〜', endDate);
+      const walks = await WalkService.listByDateRange(
         user.familyId,
-        currentWeekStart,
-        weekEnd
+        startDate,
+        endDate
       );
-      setWalks(walksData);
+      setWalks(walks);
     } catch (err: any) {
       console.error('散歩データ取得エラー:', err);
       if (err.message?.includes('network')) {
@@ -104,18 +113,6 @@ export default function MapScreen() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handlePreviousWeek = () => {
-    const newStart = new Date(currentWeekStart);
-    newStart.setDate(newStart.getDate() - 7);
-    setCurrentWeekStart(newStart);
-  };
-
-  const handleNextWeek = () => {
-    const newStart = new Date(currentWeekStart);
-    newStart.setDate(newStart.getDate() + 7);
-    setCurrentWeekStart(newStart);
   };
 
   const getMapRegion = () => {
@@ -146,25 +143,18 @@ export default function MapScreen() {
     };
   };
 
-  const weekEnd = getWeekEnd(currentWeekStart);
-  
   // 同日内でインデックスと色を付与
   const walksForMap = WalkMapService.enrich(walks)
 
   return (
     <View style={styles.container}>
       {/* 週選択ヘッダー */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={handlePreviousWeek} style={styles.navButton}>
-          <Text style={styles.navButtonText}>◀</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerText}>
-          {formatDate(currentWeekStart)} - {formatDate(weekEnd)}
-        </Text>
-        <TouchableOpacity onPress={handleNextWeek} style={styles.navButton}>
-          <Text style={styles.navButtonText}>▶</Text>
-        </TouchableOpacity>
-      </View>
+      <DateRangeHeader
+        startDate={startDate}
+        endDate={endDate}
+        onPrevious={handlePrevious}
+        onNext={handleNext}
+      />
 
       {/* コンテンツ */}
       {error ? (
@@ -272,25 +262,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F5F5F5',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 16,
-    backgroundColor: '#FFFFFF',
-  },
-  navButton: {
-    padding: 8,
-  },
-  navButtonText: {
-    fontSize: 24,
-    color: '#4A90E2',
-  },
-  headerText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333333',
   },
   loadingContainer: {
     flex: 1,

@@ -14,6 +14,9 @@ import { useUser } from '@/hooks/use-user';
 import { formatDistance, formatDurationJa } from '@/utils/formatters';
 import { WalkStats } from '@/services/walk-statistics.service';
 import { WalkStatisticsService } from '@/services/walk-statistics.service';
+import DateRangeHeader from '@/components/ui/date-range-header';
+import { useDateRangeNavigator } from '@/hooks/date-range-navigator';
+import { getWeekStart, getWeekEnd, getMonthStart, getMonthEnd } from '@/utils/date';
 
 type Period = 'week' | 'month';
 
@@ -31,6 +34,18 @@ export default function StatsView() {
     avgDistance: 0,
     avgDuration: 0,
   });
+  const {
+    startDate,
+    endDate,
+    currentDate,
+    handlePrevious,
+    handleNext,
+    resetToToday,
+  } = useDateRangeNavigator({
+    period: selectedPeriod,
+    getStartDate: selectedPeriod === 'week' ? getWeekStart : getMonthStart,
+    getEndDate: selectedPeriod === 'week' ? getWeekEnd : getMonthEnd,
+  });
 
   // Swipeableの参照を保持（開いているスワイプを閉じるため）
   const swipeableRefs = React.useRef<Map<string, Swipeable>>(new Map());
@@ -39,7 +54,7 @@ export default function StatsView() {
     React.useCallback(() => {
       console.log('記録タブにフォーカス - 最新データを取得');
       loadStats();
-    }, [selectedPeriod])
+    }, [selectedPeriod, currentDate])
   );
 
   const loadStats = async () => {
@@ -49,17 +64,15 @@ export default function StatsView() {
     try {
 
       if (!user) return ;
-      const walks = await WalkService.listByPeriod(
+      const walks = await WalkService.listByDateRange(
         user.familyId,
-        selectedPeriod
-      )
+        startDate,
+        endDate
+      );
       setWalks(walks);
   
-      const stats = await WalkStatisticsService.getStatisicsByFamily(
-        user.familyId,
-        selectedPeriod
-      )
-      setStats(stats)
+      const stats = WalkStatisticsService.calculateStats(walks);
+      setStats(stats);
     } catch (err: any) {
       console.error('統計データ取得エラー:', err);
       
@@ -156,7 +169,10 @@ export default function StatsView() {
       <View style={styles.tabs}>
         <TouchableOpacity
           style={[styles.tab, selectedPeriod === 'week' && styles.activeTab]}
-          onPress={() => setSelectedPeriod('week')}
+          onPress={() => {
+            setSelectedPeriod('week');
+            resetToToday();
+          }}
         >
           <Text style={[styles.tabText, selectedPeriod === 'week' && styles.activeTabText]}>
             週間
@@ -164,7 +180,10 @@ export default function StatsView() {
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.tab, selectedPeriod === 'month' && styles.activeTab]}
-          onPress={() => setSelectedPeriod('month')}
+          onPress={() => {
+            setSelectedPeriod('month');
+            resetToToday();
+          }}
         >
           <Text style={[styles.tabText, selectedPeriod === 'month' && styles.activeTabText]}>
             月間
@@ -172,12 +191,13 @@ export default function StatsView() {
         </TouchableOpacity>
       </View>
 
-      {/* 期間表示 */}
-      <View style={styles.periodInfo}>
-        <Text style={styles.periodText}>
-          {selectedPeriod === 'week' ? '過去7日間' : '過去30日間'}
-        </Text>
-      </View>
+      {/* 期間ヘッダー */}
+      <DateRangeHeader
+        startDate={startDate}
+        endDate={endDate}
+        onPrevious={handlePrevious}
+        onNext={handleNext}
+      />
 
       {/* コンテンツ */}
       {error ? (
@@ -304,18 +324,6 @@ const styles = StyleSheet.create({
   activeTabText: {
     color: '#4A90E2',
     fontWeight: '600',
-  },
-  periodInfo: {
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#EEEEEE',
-  },
-  periodText: {
-    fontSize: 14,
-    color: '#666666',
-    textAlign: 'center',
   },
   statsContainer: {
     flex: 1,
