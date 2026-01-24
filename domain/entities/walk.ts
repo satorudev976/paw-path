@@ -1,4 +1,4 @@
-export interface Walk {
+export type Walk = {
   walkId: string;
   familyId: string;
   startTime: Date;
@@ -6,11 +6,13 @@ export interface Walk {
   durationSec: number; // 秒
   distanceMeter: number; // メートル
   routePoints: RoutePoint[];
-  recordedBy?: string; // ユーザーID
+  recordedBy: string; // ユーザーID
 }
 
-interface RoutePoint {
+export type RoutePoint = {
   latitude: number;
   longitude: number;
   timestamp: Date;
 }
+
+export type CreateWalk = Omit<Walk, 'walkId'>;

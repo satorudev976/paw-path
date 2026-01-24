@@ -1,24 +1,17 @@
 import * as TaskManager from 'expo-task-manager';
-
+import { RoutePoint } from '@/domain/entities/walk';
 // タスク名を定数としてエクスポート
 export const BACKGROUND_LOCATION_TASK_NAME = 'background-location-task';
 
-export interface LocationPoint {
-  latitude: number;
-  longitude: number;
-  timestamp: Date;
-  accuracy?: number;
-}
-
 // コールバック関数を保持
-let locationCallback: ((location: LocationPoint) => void) | null = null;
+let locationCallback: ((location: RoutePoint) => void) | null = null;
 
 /**
  * 位置情報を受け取るコールバックを設定
  * @param callback 位置情報を受け取るコールバック関数（nullでクリア）
  */
 export const setLocationCallback = (
-  callback: ((location: LocationPoint) => void) | null
+  callback: ((location: RoutePoint) => void) | null
 ) => {
   locationCallback = callback;
 };
@@ -45,11 +38,10 @@ TaskManager.defineTask(
 
       // 各位置情報をコールバックに渡す
       locations.forEach((location: any) => {
-        const point: LocationPoint = {
+        const point: RoutePoint = {
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
           timestamp: new Date(location.timestamp),
-          accuracy: location.coords.accuracy,
         };
         callback(point);
       });

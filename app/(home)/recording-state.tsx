@@ -3,10 +3,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useRef } from 'react';
 import { Animated, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { formatDistance, formatDuration } from '@/utils/formatters';
+import Toast from '@/components/ui/toast';
+import { useToast } from '@/hooks/toast';
 
 export function RecordingState() {
   const { stopRecording, distance, duration, currentSpeed } = useWalkRecording();
   const blink = useRef(new Animated.Value(1)).current;
+  const { toast, showToast, hideToast } = useToast();
 
   useEffect(() => {
     Animated.loop(
@@ -28,7 +31,13 @@ export function RecordingState() {
 
   const handleStopRecording = async () => {
     console.log('記録終了');
-    stopRecording()
+    try {
+      await stopRecording();
+      showToast('散歩を記録しました', 'success');
+    } catch (error) {
+      console.error('記録停止エラー:', error);
+      showToast('記録の保存に失敗しました', 'error');
+    }
   };
 
 
@@ -83,12 +92,12 @@ export function RecordingState() {
             <Text style={styles.stopButtonText}>散歩終了</Text>
           </TouchableOpacity>
         </ScrollView>
-        {/* <Toast
-        message={toast.message}
-        type={toast.type}
-        visible={toast.visible}
-        onHide={hideToast}
-      /> */}
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          visible={toast.visible}
+          onHide={hideToast}
+      />
     </View>
   );
 }

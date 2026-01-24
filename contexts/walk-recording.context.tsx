@@ -1,15 +1,17 @@
 import { createContext, useState, useRef, ReactNode } from 'react';
 import { LocationService } from '@/services/location.service';
-import type { LocationPoint } from '@/infrastructure/task/location.task';
+import { RoutePoint } from '@/domain/entities/walk';
+import { WalkService } from '@/services/walk.service';
+import { useUser } from '@/hooks/use-user';
 
-export type RecordingState = 'idle' | 'recording';
+type RecordingState = 'idle' | 'recording';
 
 interface WalkRecordingContextValue {
   state: RecordingState;
-  route: LocationPoint[];
-  distance: number; // メートル
-  duration: number; // 秒
-  currentSpeed: number; // km/h
+  route: RoutePoint[];
+  distance: number;
+  duration: number;
+  currentSpeed: number;
   startRecording: () => Promise<void>;
   stopRecording: () => Promise<void>;
 }
@@ -17,8 +19,9 @@ interface WalkRecordingContextValue {
 export const WalkRecordingContext = createContext<WalkRecordingContextValue | null>(null);
 
 export const WalkRecordingProvider = ({ children }: { children: ReactNode }) => {
+  const { user } = useUser();
   const [state, setState] = useState<RecordingState>('idle');
-  const [route, setRoute] = useState<LocationPoint[]>([]);
+  const [route, setRoute] = useState<RoutePoint[]>([]);
   const [distance, setDistance] = useState(0);
   const [duration, setDuration] = useState(0);
   const [currentSpeed, setCurrentSpeed] = useState(0);
@@ -67,7 +70,7 @@ export const WalkRecordingProvider = ({ children }: { children: ReactNode }) => 
       // 経過時間カウント開始
       intervalRef.current = setInterval(() => {
         setDuration((prev) => prev + 1);
-      }, 1000);
+      }, 1000) as unknown as number;
 
       setState('recording');
     } catch (error) {
@@ -78,23 +81,49 @@ export const WalkRecordingProvider = ({ children }: { children: ReactNode }) => 
 
   const stopRecording = async () => {
     try {
+      console.log('記録終了');
+
       // 位置情報追跡停止
       await LocationService.stopLocationTracking();
 
       // タイマー停止
-      if (intervalRef.current) {
+      if (intervalRef.current !== null) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
 
+      // 状態を idle に戻す
       setState('idle');
 
-      // TODO: Firestoreに保存
-      console.log('記録終了:', {
-        route: route.length,
-        distance,
-        duration,
-      });
+      // Firestoreに保存
+      try {
+        if (user) {
+          const startTime = startTimeRef.current || new Date();
+          const endTime = new Date();
+  
+          await WalkService.createWalk({
+            familyId: user.familyId,
+            startTime: startTime,
+            endTime: endTime,
+            durationSec: duration,
+            distanceMeter: Math.round(distance),
+            routePoints: route,
+            recordedBy: user.id,
+          });
+  
+          console.log('✅ 散歩を記録しました');
+        }
+
+        // 状態リセット
+        setRoute([]);
+        setDistance(0);
+        setDuration(0);
+        setCurrentSpeed(0);
+        startTimeRef.current = null;
+      } catch (error) {
+        console.error('保存エラー:', error);
+        throw error;
+      }
     } catch (error) {
       console.error('記録停止エラー:', error);
       throw error;

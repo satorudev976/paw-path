@@ -10,13 +10,25 @@ import {
   where
 } from 'firebase/firestore';
 import { db } from '@/infrastructure/firebase/firebase';
-import { Walk } from "@/domain/entities/walk"
+import { Walk, CreateWalk } from "@/domain/entities/walk"
 
 export const walkRepository = {
 
-  async addWalk(walk: Walk): Promise<void> {
-    const walksRef = collection(db, 'walks', walk.walkId);
-    await addDoc(walksRef, walk);
+  async addWalk(walk: CreateWalk): Promise<void> {
+    const walksRef = collection(db, 'walks');
+    await addDoc(walksRef, {
+      familyId: walk.familyId,
+      recordedBy: walk.recordedBy,
+      startTime: Timestamp.fromDate(walk.startTime),
+      endTime: Timestamp.fromDate(walk.endTime),
+      durationSec: walk.durationSec,
+      distanceMeter: walk.distanceMeter,
+      routePoints: walk.routePoints.map(point => ({
+        latitude: point.latitude,
+        longitude: point.longitude,
+        timestamp: point.timestamp.getTime(),
+      })),
+    });
   },
 
   async getWalksByDateRange(

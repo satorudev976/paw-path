@@ -4,13 +4,7 @@ import {
   setLocationCallback,
   BACKGROUND_LOCATION_TASK_NAME,
 } from '@/infrastructure/task/location.task';
-
-export interface LocationPoint {
-  latitude: number;
-  longitude: number;
-  timestamp: Date;
-  accuracy?: number;
-}
+import { RoutePoint } from '@/domain/entities/walk';
 
 export const LocationService = {
   /**
@@ -18,7 +12,7 @@ export const LocationService = {
    * @param callback 位置情報を受け取るコールバック関数
    */
   startLocationTracking: async (
-    callback: (location: LocationPoint) => void
+    callback: (location: RoutePoint) => void
   ): Promise<void> => {
     try {
       // コールバックを設定
@@ -85,7 +79,7 @@ export const LocationService = {
     }
   },
 
-  async getCurrentLocation(): Promise<LocationPoint | null> {
+  async getCurrentLocation(): Promise<RoutePoint | null> {
     try {
       const location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
@@ -95,7 +89,6 @@ export const LocationService = {
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
         timestamp: new Date(location.timestamp),
-        accuracy: location.coords.accuracy || undefined,
       };
     } catch (error) {
       console.error('現在位置取得エラー:', error);
@@ -123,7 +116,7 @@ export const LocationService = {
     return R * c;
   },
 
-  calculateTotalDistance(route: LocationPoint[]): number {
+  calculateTotalDistance(route: RoutePoint[]): number {
     if (route.length < 2) return 0;
   
     let totalDistance = 0;

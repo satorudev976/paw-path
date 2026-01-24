@@ -1,4 +1,4 @@
-import { Walk } from "@/domain/entities/walk";
+import { Walk, CreateWalk } from "@/domain/entities/walk";
 import { walkRepository } from "@/infrastructure/firebase/repositories/walk.repository";
 import { getWeekStart, getWeekEnd, getMonthStart, getMonthEnd} from '@/utils/date';
 
@@ -22,6 +22,13 @@ export const WalkService = {
       familyId, startDate, endDate
     );
     return walks
+  },
+
+  async createWalk(
+    walk: CreateWalk
+  ): Promise<void> {
+    
+    await walkRepository.addWalk(walk)
   },
 
   async delete(walkId: string): Promise<void> {
