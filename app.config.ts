@@ -28,12 +28,13 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     ios: {
       locales: {
         ja: {
-          CFBundleDisplayName: "ぱうぱす",
+          CFBundleDisplayName: isProd ? "ぱうぱす" : "ぱうぱす Dev",
         },
       },
       supportsTablet: true,
       bundleIdentifier: "com.jp.pripri.pawpath",
       infoPlist: {
+        CFBundleDisplayName: isProd ? "ぱうぱす" : "ぱうぱす Dev",
         NSLocationWhenInUseUsageDescription:
           "散歩ルートを正確に記録するため、アプリ使用中の位置情報へのアクセスを許可してください。",
         NSLocationAlwaysAndWhenInUseUsageDescription:
@@ -85,11 +86,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         "expo-splash-screen",
         {
           image: "./assets/images/splash-icon.png",
-          resizeMode: "contain",
-          backgroundColor: "#ffffff",
-          dark: {
-            backgroundColor: "#000000",
-          },
+          resizeMode: "cover",
         },
       ],
       [
