@@ -42,7 +42,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return
     }    
     loadUser(authUser.uid)
-  }, [authUser])
+  }, [authUser, authLoading])
 
   const refresh = async () => {
     if (!authUser) return
