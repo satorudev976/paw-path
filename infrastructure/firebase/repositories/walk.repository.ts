@@ -15,7 +15,7 @@ import { Walk, CreateWalk } from "@/domain/entities/walk"
 export const walkRepository = {
 
   async addWalk(walk: CreateWalk): Promise<void> {
-    const walksRef = collection(db, 'walks');
+    const walksRef = collection(db, 'families', walk.familyId, 'walks');
     await addDoc(walksRef, {
       familyId: walk.familyId,
       recordedBy: walk.recordedBy,
