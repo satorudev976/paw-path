@@ -48,19 +48,20 @@ export const walkRepository = {
     const querySnapshot = await getDocs(q);
     
     return querySnapshot.docs.map(doc => {
-      const data = doc.data() as Walk;
+      const data = doc.data();
+      
       return {
         walkId: doc.id,
         familyId: data.familyId,
         recordedBy: data.recordedBy,
-        startTime: data.startTime,
-        endTime: data.endTime,
+        startTime: data.startTime.toDate(), 
+        endTime: data.endTime.toDate(), 
         durationSec: data.durationSec,
         distanceMeter: data.distanceMeter,
-        routePoints: data.routePoints.map(point => ({
+        routePoints: data.routePoints.map((point: any) => ({
           latitude: point.latitude,
           longitude: point.longitude,
-          timestamp: point.timestamp,
+          timestamp: new Date(point.timestamp), 
         })),
       };
     });
