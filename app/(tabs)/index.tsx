@@ -1,14 +1,14 @@
-import { useWalkRecording } from '@/contexts/walk-recording.context';
+import { useWalkRecording } from '@/hooks/use-walk-recording';
 import { StyleSheet, View } from 'react-native';
 import { IdleState } from '../(home)/idel-state';
 import { RecordingState } from '../(home)/recording-state';
 
 export default function HomeScreen() {
-  const { isRecording } = useWalkRecording();
+  const { state } = useWalkRecording();
 
   return (
     <View style={styles.container}>
-      {isRecording ? <RecordingState /> : <IdleState />}
+      {state === 'idle' ? <IdleState /> :<RecordingState /> }
     </View>
   );
 }

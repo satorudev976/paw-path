@@ -1,16 +1,19 @@
 import { ReadOnlyBanner } from '@/components/ui/read-only-banner';
-import { useWalkRecording } from '@/contexts/walk-recording.context';
+import { useWalkRecording } from '@/hooks/use-walk-recording';
 import { useAppAccess } from '@/hooks/use-app-access';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Toast from '@/components/ui/toast';
+import { useToast } from '@/hooks/toast';
 
 export function IdleState() {
   const { readonly } = useAppAccess();
   const { startRecording } = useWalkRecording();
   const router = useRouter();
+  const { toast, showToast, hideToast } = useToast();
 
   const glowAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.95)).current;
@@ -45,7 +48,25 @@ export function IdleState() {
 
   const handleStartRecording = async () => {
     console.log('記録開始');
-    startRecording()
+    // マイクロインタラクション
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 0.92,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        friction: 3,
+        useNativeDriver: true,
+      }),
+    ]).start();
+    try {
+      await startRecording();
+      showToast('記録を開始しました', 'success');
+    } catch (error) {
+      showToast('位置情報の取得に失敗しました', 'error');
+    }
   };
 
 
@@ -99,12 +120,12 @@ export function IdleState() {
         </View>
       </View>
 
-      {/* <Toast
+      <Toast
         message={toast.message}
         type={toast.type}
         visible={toast.visible}
         onHide={hideToast}
-      /> */}
+      />
     </View>
   );
 }
