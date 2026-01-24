@@ -5,14 +5,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Animated, Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Toast from '@/components/ui/toast';
 import { useToast } from '@/hooks/toast';
+import { useLocationPermission } from '@/hooks/location-permission';
 
 export function IdleState() {
   const { readonly } = useAppAccess();
   const { startRecording } = useWalkRecording();
   const router = useRouter();
+  const { canGps } = useLocationPermission();
   const { toast, showToast, hideToast } = useToast();
 
   const glowAnim = useRef(new Animated.Value(0)).current;
@@ -47,6 +49,15 @@ export function IdleState() {
   }, []);
 
   const handleStartRecording = async () => {
+    if (!canGps) {
+      Alert.alert(
+        '権限が必要です',
+        '散歩ルートを記録するために位置情報の権限を許可してください',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+
     console.log('記録開始');
     // マイクロインタラクション
     Animated.sequence([
