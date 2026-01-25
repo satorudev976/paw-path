@@ -1,0 +1,14 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "L5UJ4235D4.com.jp.pripri.pawpath",
+        "paths": [
+          "/invite",
+          "/invite/*"
+        ]
+      }
+    ]
+  }
+}

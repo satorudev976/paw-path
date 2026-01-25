@@ -2,10 +2,26 @@
   "hosting": {
     "target": "web",
     "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "headers": [
+      {
+        "source": "/.well-known/apple-app-site-association",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ]
+      }
+    ],
     "rewrites": [
       {
-        "source": "/verifyInvite",
-        "function": "verifyInvite"
+        "source": "**",
+        "destination": "/index.html"
       }
     ]
   }

@@ -18,8 +18,8 @@ import { useAppAccess } from '@/hooks/use-app-access';
 import { useUser } from '@/hooks/use-user';
 import { UserService } from '@/services/user.service';
 import { User } from '@/domain/entities/user';
-import { InviteService } from '@/services/invite.service';
 import { privacyUrl, supportUrl, termsUrl, inviteUrl } from '@/constants/site';
+import { InviteService } from '@/services/invite.service';
 
 export default function OwnwerSettingsScreen() {
   const router = useRouter();
@@ -54,13 +54,26 @@ export default function OwnwerSettingsScreen() {
 
 
   const handleInvite = async () => {
-    const token = await InviteService.createInvite();
-    const url = `${inviteUrl}?token=${token}`;
-    const shareMessage = `「ぱうぱす」への招待です。\n\n下のリンクをタップするだけで簡単に参加できます：\n${url}\n\n※このリンクは24時間有効です`;
-    await Share.share({
-      message: shareMessage,
-      title: 'ぱうぱすに招待',
-    });
+    try {
+      if (!user) return;
+
+      const token = await InviteService.createInvite(user.familyId, user.id);
+      
+      const url = `${inviteUrl}?token=${token}`;
+      
+      const shareMessage = `「ぱうぱす」への招待です。
+        下のリンクをタップして家族に参加しましょう！
+        ${url}
+        ※このリンクは24時間有効です`;
+      
+      await Share.share({
+        message: shareMessage,
+        title: 'ぱうぱすに招待',
+      });
+    } catch (error) {
+      console.error('招待リンク作成エラー:', error);
+      Alert.alert('エラー', '招待リンクの作成に失敗しました');
+    }
   };
 
   // ユーザー情報編集画面へ遷移

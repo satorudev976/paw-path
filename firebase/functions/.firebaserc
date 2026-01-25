@@ -1,6 +1,0 @@
-{
-  "projects": {
-    "default": "pawpath-dev",
-    "prod": "pawpath-prod"
-  },
-}
