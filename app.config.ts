@@ -40,7 +40,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       supportsTablet: true,
       bundleIdentifier: "com.jp.pripri.pawpath",
       associatedDomains: [
-        "applinks:pawpath.jp",
+        "applinks:pawpath.web.app",
+        "applinks:pawpath-dev.web.app",
       ],
       infoPlist: {
         CFBundleDisplayName: isProd ? "ぱうぱす" : "ぱうぱす Dev",
