@@ -60,11 +60,7 @@ export default function OwnwerSettingsScreen() {
       const token = await InviteService.createInvite(user.familyId, user.id);
       
       const url = `${inviteUrl}?token=${token}`;
-      
-      const shareMessage = `「ぱうぱす」への招待です。
-        下のリンクをタップして家族に参加しましょう！
-        ${url}
-        ※このリンクは24時間有効です`;
+      const shareMessage = `「ぱうぱす」への招待です。\n\n下のリンクをタップするだけで簡単に参加できます：\n${url}\n\n※このリンクは24時間有効です`;
       
       await Share.share({
         message: shareMessage,
