@@ -4,7 +4,8 @@
     "public": "public",
     "ignore": [
       "firebase.json",
-      "**/.*",
+      "**/.git",
+      "**/.gitignore",
       "**/node_modules/**"
     ],
     "headers": [
@@ -19,10 +20,10 @@
       }
     ],
     "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
+      { "source": "/privacy", "destination": "/privacy.html" },
+      { "source": "/terms", "destination": "/terms.html" },
+      { "source": "/support", "destination": "/support.html" },
+      { "source": "**",  "destination": "/index.html"}
     ]
   }
 }
