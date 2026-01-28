@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { setUpOwnerService } from '@/services/setup-owner.service';
 import { useAuth } from '@/hooks/use-auth';
+import { useUser } from '@/hooks/use-user';
 import { useInvite } from '@/hooks/use-invite';
 import { NicknameErrorCode, NicknameErrorCodes } from '@/domain/profile/nickname.errors';
 import { InviteJoinService } from '@/services/invite-join.service';
@@ -21,10 +22,17 @@ import { UserProfileService } from '@/services/user-profile.service';
 export default function NicknameScreen() {
   const router = useRouter();
   const { authUser } = useAuth();
+  const { user, refresh } = useUser();
   const { invite, clearInviteData } = useInvite();
   
   const [nickname, setNickname] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      router.replace('/');
+    }
+  }, [user]);
 
   const nicknameErrorMessage = (code: NicknameErrorCode) => {
     switch (code) {
@@ -55,7 +63,7 @@ export default function NicknameScreen() {
       } else {
         await setUpOwnerService.setUp(authUser!.uid, nickname.trim());
       }
-      router.replace('/(tabs)')
+      refresh();
     } catch (error: any) {
       console.error('セットアップエラー:', error);
     } finally {
