@@ -5,6 +5,7 @@ import {
   getDoc,
   Timestamp,
   Transaction,
+  deleteDoc,
 } from 'firebase/firestore';
 
 export const familyRepository = {
@@ -32,5 +33,10 @@ export const familyRepository = {
       trialEndAt: data.trialEndAt.toDate(),
     } as Family;
   },
+
+  async delete(familyId: string) {
+    const familyRef = doc(db, 'families', familyId);
+    await deleteDoc(familyRef);
+  }
 
 };
