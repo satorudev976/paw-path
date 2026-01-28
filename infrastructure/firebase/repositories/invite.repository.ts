@@ -1,8 +1,12 @@
 import { 
   collection, 
+  query,
   doc, 
   getDoc, 
   setDoc, 
+  where, 
+  getDocs,
+  writeBatch,
   updateDoc,
   Timestamp 
 } from 'firebase/firestore';
@@ -54,6 +58,29 @@ export const inviteRepository = {
   async updateIsActive(token: string, isActive: boolean): Promise<void> {
     const inviteRef = doc(db, 'invites', token);
     await updateDoc(inviteRef, { isActive });
+  },
+
+  /**
+   * 招待を削除
+   * @param familyId 家族ID
+   */
+  async deleteByFamilyId(familyId: string): Promise<void> {
+    const invitesRef = collection(db, 'invites');
+    const q = query(invitesRef, where('familyId', '==', familyId));
+    const invitesSnapshot = await getDocs(q);
+
+    if (invitesSnapshot.empty) {
+      console.log('削除する招待なし');
+      return;
+    }
+
+    const batch = writeBatch(db);
+    invitesSnapshot.docs.forEach((doc) => {
+      batch.delete(doc.ref);
+    });
+
+    await batch.commit();
+    console.log(`招待削除: ${invitesSnapshot.size}件`);
   },
 
 };
