@@ -23,19 +23,20 @@ export default function Index() {
     if (authLoading || userLoading || subscriptionLoading || appAccessLoading) return
 
     if (inviteToken) {
-      // 未認証 → ログイン画面へ
-      if (!authUser) {
-        router.replace('/login')
-      }
       
-      // 認証済み + 未ニックネーム設定 → ニックネーム設定へ
-      if (!user) {
-        router.replace('/(onboarding)/nickname')
+      console.log('招待リンクからの遷移')
+      if (!authUser) {
+        // 未認証 → ログイン画面へ
+        console.log('未認証 → ログイン画面へ')
+        router.replace('/login')
         return
       }
       
-      // 既にアカウントがあるユーザー（TODO アカウント削除を促す）
-      router.replace('/(tabs)')
+      // 認証済み → 招待検証画面へ（ユーザー存在有無に関わらず）
+      // [token].tsx で検証後、適切な画面に遷移する
+      console.log('認証済み →  [token].tsx で検証後、適切な画面に遷移する')
+      router.replace(`/(auth)/invite/${inviteToken}`)
+      return
     }
 
     // 未ログイン（新規ユーザー、ログアウト後のユーザー）

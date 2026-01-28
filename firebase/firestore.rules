@@ -82,14 +82,16 @@ service cloud.firestore {
 
     match /invites/{inviteId} {
 
-      // 家族オーナーのみ read
-      allow read: if isSignedIn() && isOwner();
+      // 認証済みユーザー全員 read
+      allow read: if isSignedIn();
 
       // 作成：オーナーのみ
       allow create: if isSignedIn() && isOwner();
 
-      // 更新：Function のみ想定
-      allow update: if false;
+      // 更新：isActiveをfalseにする更新のみ許可
+      allow update: if isSignedIn() 
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isActive'])
+          && request.resource.data.isActive == false;
 
       // 削除：期限切れ cleanup 用
       allow delete: if false;

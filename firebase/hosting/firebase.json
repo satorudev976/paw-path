@@ -15,11 +15,16 @@
           {
             "key": "Content-Type",
             "value": "application/json"
+          },
+          {
+            "key": "Cache-Control",
+            "value": "max-age=0, no-cache, no-store, must-revalidate"
           }
         ]
       }
     ],
     "rewrites": [
+      { "source": "/invite", "destination": "/invite.html" },
       { "source": "/privacy", "destination": "/privacy.html" },
       { "source": "/terms", "destination": "/terms.html" },
       { "source": "/support", "destination": "/support.html" },
