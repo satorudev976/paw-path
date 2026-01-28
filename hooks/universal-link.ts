@@ -59,11 +59,8 @@ export function useUniversalLink() {
         return;
       }
       
-      // 有効な招待データをContextに保存（メモリ上のみ）
-      // ルーティングは app/index.tsx で行う
-      setInviteData(token, invite.familyId);
+      setInviteData(token);
       
-      console.log('✅ 有効な招待を保存:', invite.familyId);
     }
   };
 }
