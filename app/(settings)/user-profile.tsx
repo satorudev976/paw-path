@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useUser } from '@/hooks/use-user';
 import { AuthService } from '@/services/auth.service';
 import { UserService } from '@/services/user.service';
+import { AccountDeletionService } from '@/services/account-deletion.service';
 import { useAuth } from '@/hooks/use-auth';
 
 export default function UserProfileScreen() {
@@ -91,9 +92,10 @@ export default function UserProfileScreen() {
   };
 
   const handleDeleteAccount = async () => {
+    if (!user) return;
     Alert.alert(
       '⚠️ アカウント削除',
-      'アカウントを削除すると、全メンバーの散歩記録が完全に削除されます。\n\nこの操作は取り消せません。本当に削除しますか?',
+      'アカウントを削除すると、あなたが記録した散歩データが削除されます。\n\nこの操作は取り消せません。本当に削除しますか?',
       [
         { text: 'キャンセル', style: 'cancel' },
         {
@@ -119,10 +121,35 @@ export default function UserProfileScreen() {
   };
 
   const executeAccountDeletion = async () => {
+    if (!user) return;
+
     try {
-      console.log('アカウント削除開始:');
+      console.log('アカウント削除開始:', user.id);
+
+      const result = await AccountDeletionService.deleteAccount(user.id);
+
+      if (result === true) {
+        console.log('✅ アカウント削除完了');
+        // 削除成功（自動的にログイン画面にリダイレクトされる）
+      } else {
+        // エラー
+        const errorMessage = getAccountDeletionErrorMessage(result.error);
+        Alert.alert('エラー', errorMessage);
+      }
     } catch (error: any) {
       console.error('❌ アカウント削除エラー:', error);
+      Alert.alert('エラー', 'アカウントの削除に失敗しました');
+    }
+  };
+
+  const getAccountDeletionErrorMessage = (error: string): string => {
+    switch (error) {
+      case 'user-not-found':
+        return 'ユーザーが見つかりません';
+      case 'owner-has-members':
+        return '他のメンバーがいるため、オーナーは退会できません';
+      default:
+        return '予期しないエラーが発生しました';
     }
   };
 
@@ -196,8 +223,8 @@ export default function UserProfileScreen() {
             {/* アカウント削除ボタン */}
             <TouchableOpacity 
                 style={[styles.actionButton, { marginTop: 12 }]} 
-                onPress={handleDeleteAccount}
-              >
+              onPress={handleDeleteAccount}
+            >
               <Ionicons name="trash-outline" size={24} color="#FF6B6B" />
               <Text style={styles.actionButtonText}>アカウントを削除</Text>
               <Ionicons name="chevron-forward" size={20} color="#CCCCCC" />
