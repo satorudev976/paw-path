@@ -8,6 +8,7 @@ import {
   getDocs,
   writeBatch,
   updateDoc,
+  Transaction,
   Timestamp 
 } from 'firebase/firestore';
 import { db } from '@/infrastructure/firebase/firebase';
@@ -55,9 +56,9 @@ export const inviteRepository = {
   /**
    * 招待のisActiveを更新
    */
-  async updateIsActive(token: string, isActive: boolean): Promise<void> {
+  async updateIsActive(tx: Transaction, token: string, isActive: boolean): Promise<void> {
     const inviteRef = doc(db, 'invites', token);
-    await updateDoc(inviteRef, { isActive });
+    tx.update(inviteRef, { isActive });
   },
 
   /**

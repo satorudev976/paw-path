@@ -13,7 +13,6 @@ export const setUpOwnerService = {
 
   async setUp(userId: string, nickname: string): Promise<void> {
     const familyId = doc(collection(db, 'families')).id
-
     const now = new Date()
     const trialEndAt = new Date(
       now.getTime() + 7 * 24 * 60 * 60 * 1000

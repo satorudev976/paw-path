@@ -1,4 +1,3 @@
-// app/(onboarding)/nickname.tsx
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -15,103 +14,59 @@ import {
 import { setUpOwnerService } from '@/services/setup-owner.service';
 import { useAuth } from '@/hooks/use-auth';
 import { useInvite } from '@/hooks/use-invite';
-import { doc, setDoc, Timestamp } from 'firebase/firestore';
-import { db } from '@/infrastructure/firebase/firebase';
-import { InviteService } from '@/services/invite.service';
+import { NicknameErrorCode, NicknameErrorCodes } from '@/domain/profile/nickname.errors';
+import { InviteJoinService } from '@/services/invite-join.service';
+import { UserProfileService } from '@/services/user-profile.service';
 
 export default function NicknameScreen() {
   const router = useRouter();
   const { authUser } = useAuth();
-  const { inviteToken, inviteFamilyId, clearInviteData } = useInvite();
+  const { invite, clearInviteData } = useInvite();
   
   const [nickname, setNickname] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
-  const isInvite = !!inviteToken && !!inviteFamilyId;
+
+  const nicknameErrorMessage = (code: NicknameErrorCode) => {
+    switch (code) {
+      case NicknameErrorCodes.TooShort:
+        return 'ニックネームを入力してください'
+      case NicknameErrorCodes.TooLong:
+        return 'ニックネームは20文字以内で入力してください'
+      default:
+        return '入力内容を確認してください'
+    }
+  }
 
   const handleSetUp = async () => {
-    // バリデーション
-    if (!nickname.trim()) {
-      Alert.alert('エラー', 'ニックネームを入力してください');
-      return;
-    }
-
-    if (nickname.trim().length > 20) {
-      Alert.alert('エラー', 'ニックネームは20文字以内で入力してください');
-      return;
-    }
-
-    if (!authUser) {
-      Alert.alert('エラー', '認証情報が見つかりません');
-      return;
-    }
 
     setIsLoading(true);
+
+    const result = UserProfileService.validateNickname(nickname.trim());
+    if (!result.ok) {
+      Alert.alert('入力エラー', nicknameErrorMessage(result.error.code));
+      return;
+    }
     
     try {
-      if (isInvite) {
-        await handleInviteJoin();
+      if (invite) {
+        if (authUser) {
+          await InviteJoinService.joinFamily(invite, authUser.uid, nickname.trim());
+        }
       } else {
-        await handleOwnerSetup();
+        await setUpOwnerService.setUp(authUser!.uid, nickname.trim());
       }
+      router.replace('/(tabs)')
     } catch (error: any) {
       console.error('セットアップエラー:', error);
-      Alert.alert('エラー', 'セットアップに失敗しました');
-      
-      if (isInvite) {
+    } finally {
+      if (invite) {
         clearInviteData();
       }
-    } finally {
       setIsLoading(false);
     }
   };
 
-  /**
-   * 通常の新規登録フロー
-   */
-  const handleOwnerSetup = async () => {
-    await setUpOwnerService.setUp(authUser!.uid, nickname.trim());
-    
-    Alert.alert(
-      '登録完了！',
-      `${nickname.trim()}さん、ようこそ！`,
-      [{ text: 'OK', onPress: () => router.replace('/(tabs)') }]
-    );
-  };
 
-  /**
-   * 招待リンク経由のフロー
-   * 
-   * 1. Firestoreにユーザーを作成（familyId, role: 'family'）
-   * 2. 招待を無効化
-   * 3. 招待データをクリア
-   */
-  const handleInviteJoin = async () => {
-    if (!inviteToken || !inviteFamilyId) {
-      throw new Error('招待情報が不足しています');
-    }
-
-    // 1. ユーザーをFirestoreに作成
-    const userRef = doc(db, 'users', authUser!.uid);
-    await setDoc(userRef, {
-      familyId: inviteFamilyId,
-      role: 'family',
-      nickname: nickname.trim(),
-      createdAt: Timestamp.now(),
-    }, { merge: true });
-
-    // 2. 招待を無効化
-    await InviteService.deactivateInvite(inviteToken);
-
-    // 3. 招待データをクリア
-    clearInviteData();
-    
-    Alert.alert(
-      '家族に参加しました！',
-      `${nickname.trim()}さん、ようこそ！`,
-      [{ text: 'OK', onPress: () => router.replace('/(tabs)') }]
-    );
-  };
 
   return (
     <KeyboardAvoidingView
@@ -119,16 +74,10 @@ export default function NicknameScreen() {
       style={styles.container}
     >
       <View style={styles.content}>
-        <Text style={styles.emoji}>{isInvite ? '👨‍👩‍👧‍👦' : '🐾'}</Text>
+        <Text style={styles.emoji}>🐾</Text>
         <Text style={styles.title}>
-          {isInvite ? '家族に参加' : 'ニックネームを設定'}
+          ニックネームを設定
         </Text>
-        {isInvite && (
-          <Text style={styles.subtitle}>
-            家族から招待されました！{'\n'}
-            ニックネームを入力して参加しましょう
-          </Text>
-        )}
 
         <TextInput
           style={styles.input}
@@ -151,7 +100,7 @@ export default function NicknameScreen() {
             <ActivityIndicator color="#FFFFFF" />
           ) : (
             <Text style={styles.buttonText}>
-              {isInvite ? '参加する' : '設定完了'}
+              設定完了
             </Text>
           )}
         </TouchableOpacity>
