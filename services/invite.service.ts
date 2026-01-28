@@ -1,6 +1,9 @@
 import { inviteRepository } from '@/infrastructure/firebase/repositories/invite.repository';
 import { Invite } from '@/domain/entities/invite';
 import { randomUUID } from 'expo-crypto';
+import { err, ok, type Result } from '@/domain/shared/result'
+import { makeError } from '@/domain/shared/errorFactory'
+import { InviteErrorCodes, type InviteError } from '@/domain/invite/invite.errors'
 
 export const InviteService = {
 
@@ -39,22 +42,22 @@ export const InviteService = {
    * 招待の有効性を確認
    * @returns 有効な招待の場合、招待情報を返す。無効な場合はnull
    */
-  async verifyInvite(token: string): Promise<Invite | null> {
+  async verifyInvite(token: string): Promise<Result<void, InviteError>> {
+    // 招待を検証
     const invite = await inviteRepository.get(token);
-    
+
     if (!invite) {
-      return null;
+      return err(makeError(InviteErrorCodes.InvalidToken));
     }
 
     if (!invite.isActive) {
-      return null;
+      return err(makeError(InviteErrorCodes.AlreadyUsed));
     }
 
     if (invite.expiresAt < new Date()) {
-      return null;
+      return err(makeError(InviteErrorCodes.Expired));
     }
-
-    return invite;
+    return ok(undefined);
   },
 
   /**
