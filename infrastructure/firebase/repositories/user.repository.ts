@@ -86,6 +86,18 @@ export const userRepository = {
     })
   },
 
+  /**
+   * 家族のメンバー数を取得
+   * @param familyId 家族ID
+   * @returns メンバー数
+   */
+  async countByFamilyId(familyId: string): Promise<number> {
+    const ref = collection(db, "users");
+    const q = query(ref, where("familyId", "==", familyId));
+    const snapshot = await getDocs(q);
+    return snapshot.size;
+  },
+
   async delete(uid: string): Promise<void> {
     await deleteDoc(doc(db, 'users', uid))
   },

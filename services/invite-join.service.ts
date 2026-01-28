@@ -1,4 +1,4 @@
-import { runTransaction, doc, collection, query, where, getDocs } from 'firebase/firestore';
+import { runTransaction, doc } from 'firebase/firestore';
 import { db } from '@/infrastructure/firebase/firebase';
 import { inviteRepository } from '@/infrastructure/firebase/repositories/invite.repository';
 import { userRepository } from '@/infrastructure/firebase/repositories/user.repository';
@@ -47,25 +47,18 @@ export const InviteJoinService = {
    * @returns 参加可能か、エラー型
    */
   async canJoinFamily(userId: string): Promise<true | { error: InviteJoinError }> {
-    const existingUser = await userRepository.findById(userId);
+    const user = await userRepository.findById(userId);
 
-    if (!existingUser) {
+    if (!user) {
       // ユーザーが存在しない場合は参加可能
       return true;
     }
-
-    // 既存ユーザーの familyId に属する他のユーザーをカウント
-    const usersRef = collection(db, 'users');
-    const q = query(usersRef, where('familyId', '==', existingUser.familyId));
-    const snapshot = await getDocs(q);
-
-    // 自分だけの場合は参加可能
-    if (snapshot.size === 1) {
-      return true;
+    const count = await userRepository.countByFamilyId(user.familyId);
+    // オーナーの場合、他にメンバーがいるかチェック
+    if (count > 1) {
+      return { error: 'already-in-family' };
     }
-
-    // 他のユーザーがいる場合は参加不可
-    return { error: 'already-in-family' };
+    return true
   },
 
   /**

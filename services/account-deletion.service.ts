@@ -29,9 +29,9 @@ export const AccountDeletionService = {
       }
 
       if (user.role === 'owner') {
-        const familyMembers = await userRepository.findByFamilyId(user.familyId);
+        const count = await userRepository.countByFamilyId(user.familyId);
         // オーナーの場合、他にメンバーがいるかチェック
-        if (familyMembers.length > 1) {
+        if (count > 1) {
           return { error: 'owner-has-members' };
         }
       }
