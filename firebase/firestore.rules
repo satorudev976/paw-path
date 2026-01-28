@@ -58,8 +58,8 @@ service cloud.firestore {
       // 更新は owner のみ
       allow update: if belongsToFamilySafe(familyId) && isOwner();
 
-      // 削除は原則禁止
-      allow delete: if false;
+      // owner のみ
+      allow delete: if isSignedIn() && isOwner();
     }
 
     match /families/{familyId}/walks/{walkId} {
