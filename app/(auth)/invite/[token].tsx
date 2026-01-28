@@ -1,74 +1,76 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import { InviteJoinService, InviteJoinError } from '@/services/invite-join.service';
+import { InviteService } from '@/services/invite.service';
+import { UserService } from '@/services/user.service';
 import { useAuth } from '@/hooks/use-auth';
+import { InviteErrorCode, InviteErrorCodes } from '@/domain/invite/invite.errors';
+import { UserErrorCode, UserErrorCodes } from '@/domain/user/user.error';
+import { useInvite } from '@/hooks/use-invite';
+import { OwnerToFamilyService } from '@/services/owner-to-family.service';
 
 export default function InviteTokenScreen() {
-  const { token } = useLocalSearchParams<{ token: string }>();
   const router = useRouter();
   const { authUser } = useAuth();
-  const [error, setError] = useState<InviteJoinError | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState(true);
+  const { invite, clearInviteData } = useInvite();
 
   useEffect(() => {
-    if (!token) {
-      setError('invite-not-found');
-      setIsVerifying(false);
-      return;
-    }
-
-    if (!authUser) {
-      // 認証されていない場合はログイン画面へ
-      router.replace('/login');
-      return;
-    }
-
     verifyAndNavigate();
-  }, [token, authUser]);
+  }, [invite, authUser]);
 
   const verifyAndNavigate = async () => {
-    if (!token || !authUser) return;
+    if (!invite || !authUser) return;
 
     setIsVerifying(true);
 
     // 招待を検証
-    const verifyResult = await InviteJoinService.verifyInvite(token);
-    if ('error' in verifyResult) {
-      setError(verifyResult.error);
+    const verifyResult = await InviteService.verifyInvite(invite);
+    if (!verifyResult.ok) {
+      setError(verifyErrorMessage(verifyResult.error.code));
       setIsVerifying(false);
+      clearInviteData();
       return;
     }
 
     // 参加可能かチェック
-    const canJoinResult = await InviteJoinService.canJoinFamily(authUser.uid);
-    if (canJoinResult !== true) {
-      setError(canJoinResult.error);
+    const canJoinResult = await UserService.canJoinFamily(authUser.uid);
+    if (!canJoinResult.ok) {
+      setError(joinFamilyMessage(canJoinResult.error.code));
       setIsVerifying(false);
+      clearInviteData();
       return;
     }
 
-    // 検証成功 → ニックネーム入力画面へ
-    router.replace({
-      pathname: '/(auth)/invite/nickname',
-      params: { token, familyId: verifyResult.familyId },
-    });
-  };
 
-  const getErrorMessage = (error: InviteJoinError): string => {
-    switch (error) {
-      case 'invite-not-found':
-        return '招待が見つかりません';
-      case 'invite-expired':
-        return '招待の有効期限が切れています';
-      case 'invite-inactive':
-        return 'この招待は既に使用されています';
-      case 'already-in-family':
-        return '既に他の家族に所属しているため、参加できません';
-      default:
-        return '招待の確認中にエラーが発生しました';
+    const joinUser = await UserService.get(authUser.uid);
+    if (joinUser) {
+        await OwnerToFamilyService.toFamily(invite.familyId)
     }
   };
+
+  const verifyErrorMessage = (code: InviteErrorCode) => {
+    switch (code) {
+      case InviteErrorCodes.Expired:
+        return '招待の有効期限が切れています';
+      case InviteErrorCodes.InvalidToken:
+        return '使用不可能な招待リンクです'
+      case InviteErrorCodes.AlreadyUsed:
+        return 'この招待は既に使用されています'
+      default:
+        return '招待の確認中にエラーが発生しました'
+    }
+  }
+
+  const joinFamilyMessage = (code: UserErrorCode) => {
+    switch (code) {
+      case UserErrorCodes.AlreadyInFamily:
+        return '既に他の家族に所属しているため、参加できません'
+      default:
+        return '招待の確認中にエラーが発生しました'
+    }
+  }
 
   if (isVerifying) {
     return (
@@ -84,12 +86,12 @@ export default function InviteTokenScreen() {
       <View style={styles.container}>
         <Text style={styles.errorIcon}>⚠️</Text>
         <Text style={styles.errorTitle}>招待リンクが無効です</Text>
-        <Text style={styles.errorMessage}>{getErrorMessage(error)}</Text>
+        <Text style={styles.errorMessage}>{error}</Text>
         <Text
           style={styles.backButton}
-          onPress={() => router.replace('/(tabs)')}
+          onPress={() => router.replace('/')}
         >
-          ホームに戻る
+          戻る
         </Text>
       </View>
     );
