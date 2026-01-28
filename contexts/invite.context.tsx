@@ -1,28 +1,29 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { Invite } from '@/domain/entities/invite';
 
 type InviteContextType = {
-  inviteToken: string | null;
-  setInviteData: (token: string) => void;
+  invite: Invite | null;
+  setInviteData: (invite: Invite) => void;
   clearInviteData: () => void;
 };
 
 export const InviteContext = createContext<InviteContextType | undefined>(undefined);
 
 export function InviteProvider({ children }: { children: ReactNode }) {
-  const [inviteToken, setInviteToken] = useState<string | null>(null);
+  const [invite, setInvite] = useState<Invite | null>(null);
 
-  const setInviteData = (token: string) => {
-    setInviteToken(token);
+  const setInviteData = (invite: Invite) => {
+    setInvite(invite);
   };
 
   const clearInviteData = () => {
-    setInviteToken(null);
+    setInvite(null);
   };
 
   return (
     <InviteContext.Provider 
       value={{ 
-        inviteToken,
+        invite,
         setInviteData,
         clearInviteData 
       }}

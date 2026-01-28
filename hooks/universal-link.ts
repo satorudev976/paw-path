@@ -1,18 +1,10 @@
-// hooks/use-universal-link.ts
 import { useEffect } from 'react';
 import * as Linking from 'expo-linking';
-import { Alert } from 'react-native';
 import { useInvite } from '@/hooks/use-invite';
 import { InviteService } from '@/services/invite.service';
 
-/**
- * Universal Links ハンドリングフック
- * 
- * 招待リンク（https://your-domain.web.app/invite?token=xxx）を処理し、
- * 有効な招待データをContextに保存する
- */
 export function useUniversalLink() {
-  const { setInviteData, clearInviteData } = useInvite();
+  const { setInviteData } = useInvite();
 
   useEffect(() => {
     // 初回URLの処理
@@ -36,7 +28,7 @@ export function useUniversalLink() {
   }, []);
 
   const handleInviteLink = async (url: string) => {
-    console.log('📨 受信URL:', url);
+    console.log('受信URL:', url);
     
     const { path, queryParams } = Linking.parse(url);
     
@@ -44,22 +36,15 @@ export function useUniversalLink() {
     if (path === 'invite' && queryParams?.token) {
       const token = queryParams.token as string;
       
-      console.log('📨 招待トークン受信:', token);
+      console.log('招待トークン受信:', token);
       
       // アプリ内でFirestoreから招待を検証
-      const invite = await InviteService.verifyInvite(token);
+      const invite = await InviteService.getInvite(token);
       
-      if (!invite) {
-        // 無効な招待
-        Alert.alert(
-          '招待リンクが無効です',
-          'この招待は既に使用されているか、有効期限が切れています。'
-        );
-        clearInviteData();
-        return;
+      
+      if (invite) {
+        setInviteData(invite);
       }
-      
-      setInviteData(token);
       
     }
   };
