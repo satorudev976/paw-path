@@ -16,13 +16,13 @@ export default function Index() {
   const { user, isLoading: userLoading } = useUser()
   const { isLoading: subscriptionLoading } = useSubscription()
   const { isLoading: appAccessLoading } = useAppAccess()
-  const { inviteToken } = useInvite();
+  const { invite } = useInvite();
 
   useEffect(() => {
     // 判定中
     if (authLoading || userLoading || subscriptionLoading || appAccessLoading) return
 
-    if (inviteToken) {
+    if (invite) {
       
       console.log('招待リンクからの遷移')
       if (!authUser) {
@@ -35,7 +35,7 @@ export default function Index() {
       // 認証済み → 招待検証画面へ（ユーザー存在有無に関わらず）
       // [token].tsx で検証後、適切な画面に遷移する
       console.log('認証済み →  [token].tsx で検証後、適切な画面に遷移する')
-      router.replace(`/(auth)/invite/${inviteToken}`)
+      router.replace(`/(auth)/invite/${invite.token}`)
       return
     }
 
