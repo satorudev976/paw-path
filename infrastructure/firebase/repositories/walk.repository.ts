@@ -7,6 +7,7 @@ import {
   orderBy,
   query,
   Timestamp,
+  writeBatch,
   where
 } from 'firebase/firestore';
 import { db } from '@/infrastructure/firebase/firebase';
@@ -70,5 +71,29 @@ export const walkRepository = {
   async deleteWalk(familyId: string, walkId: string): Promise<void> {
     const walkRef = doc(db, 'families', familyId, 'walks', walkId);
     await deleteDoc(walkRef);
-  }
+  },
+
+  /**
+   * 特定ユーザーの散歩記録を削除
+   * @param userId ユーザーID
+   * @param familyId 家族ID
+   */
+  async deleteWalksByUserId(userId: string, familyId: string): Promise<void> {
+    const walksRef = collection(db, 'families', familyId, 'walks');
+    const q = query(walksRef, where('recordedBy', '==', userId));
+    const walksSnapshot = await getDocs(q);
+
+    if (walksSnapshot.empty) {
+      console.log('削除する散歩記録なし');
+      return;
+    }
+
+    const batch = writeBatch(db);
+    walksSnapshot.docs.forEach((doc) => {
+      batch.delete(doc.ref);
+    });
+
+    await batch.commit();
+    console.log(`散歩記録削除: ${walksSnapshot.size}件`);
+  },
 }
