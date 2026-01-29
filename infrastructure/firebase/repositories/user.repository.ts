@@ -86,6 +86,19 @@ export const userRepository = {
     })
   },
 
+  async switchFamily(
+    tx: Transaction,
+    uid: string,
+    familyId: string
+  ): Promise<void> {
+    const userRef = doc(db, 'users', uid);
+    tx.update(userRef, {
+      familyId: familyId,
+      role: 'family',
+    });
+  },
+
+
   /**
    * 家族のメンバー数を取得
    * @param familyId 家族ID
