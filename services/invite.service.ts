@@ -42,19 +42,8 @@ export const InviteService = {
    * 招待の有効性を確認
    * @returns 有効な招待の場合、招待情報を返す。無効な場合はnull
    */
-  async verifyInvite(invite: Invite): Promise<Result<void, InviteError>> {
-    if (!invite) {
-      return err(makeError(InviteErrorCodes.InvalidToken));
-    }
-
-    if (!invite.isActive) {
-      return err(makeError(InviteErrorCodes.AlreadyUsed));
-    }
-
-    if (invite.expiresAt < new Date()) {
-      return err(makeError(InviteErrorCodes.Expired));
-    }
-    return ok(undefined);
+  async verifyInvite(token: string): Promise<boolean> {
+    return await inviteRepository.verifyInvite(token);
   },
 
   /**

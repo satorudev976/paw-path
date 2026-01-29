@@ -14,10 +14,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useGoogleAuthRequest } from '@/hooks/google-auth-request'
 import { AuthService } from '@/services/auth.service';
 import * as AppleAuthentication from 'expo-apple-authentication'
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '@/hooks/use-auth';
 
 export default function LoginScreen() {
+  const params = useLocalSearchParams<{ next?: string; token?: string }>()
   const router = useRouter();
   const { isLoading, authUser } = useAuth();
   const bounceAnim = useState(new Animated.Value(0))[0];
@@ -49,10 +50,18 @@ export default function LoginScreen() {
   }, [googleResponse]);
 
   useEffect(() => {
-    if (authUser) {
-      router.replace('/');
+    if (!authUser) return
+  
+    if (params?.next && params?.token) {
+      router.replace({
+        pathname: params.next as any,
+        params: { token: params.token },
+      })
+      return
     }
-  }, [authUser]);
+  
+    router.replace('/')
+  }, [authUser, params?.next, params?.token])
 
   const handleGoogleResponse = async (response: any) => {
     await AuthService.login({
@@ -106,11 +115,15 @@ export default function LoginScreen() {
         
         <Text style={styles.title}>ぱうぱす</Text>
 
-        {/* ステップ1: ログイン */}
+        {/* ログイン */}
         <View style={styles.stepContainer}>
           <View style={styles.stepHeader}>
             <View style={styles.stepDivider} />
-            <Text style={styles.stepLabel}>新規で始める方、既にアカウントをお持ちの方</Text>
+            <Text style={styles.stepLabel}>
+              {Boolean(params?.next && params?.token)
+                ? '招待リンクから参加される方'
+                : '新規で始める方、既にアカウントをお持ちの方'}
+            </Text>
             <View style={styles.stepDivider} />
           </View>
 
@@ -126,7 +139,11 @@ export default function LoginScreen() {
               ) : (
                 <>
                   <Text style={styles.googleIcon}>G</Text>
-                  <Text style={styles.googleButtonText}>Googleで続ける</Text>
+                  <Text style={styles.googleButtonText}>
+                    {Boolean(params?.next && params?.token)
+                      ? 'Googleでログインして参加'
+                      : 'Googleで続ける'}
+                  </Text>
                 </>
               )}
             </TouchableOpacity>
@@ -143,29 +160,15 @@ export default function LoginScreen() {
                 ) : (
                   <>
                     <Text style={styles.appleIcon}></Text>
-                    <Text style={styles.appleButtonText}>Appleで続ける</Text>
+                    <Text style={styles.appleButtonText}>
+                      {Boolean(params?.next && params?.token)
+                        ? 'Appleでログインして参加'
+                        : 'Appleで続ける'}
+                    </Text>
                   </>
                 )}
               </TouchableOpacity>
             )}
-          </View>
-        </View>
-
-        {/* ステップ2: 招待 */}
-        <View style={styles.stepContainer}>
-          <View style={styles.stepHeader}>
-            <View style={styles.stepDivider} />
-            <Text style={styles.stepLabel}>家族から招待された方</Text>
-            <View style={styles.stepDivider} />
-          </View>
-
-          {/* 招待リンク案内 */}
-          <View style={styles.inviteInfo}>
-          <Text style={styles.inviteTitle}>👨‍👩‍👧‍👦 家族から招待されましたか?</Text>
-            <Text style={styles.inviteText}>
-              家族から招待リンクを送られた方は{'\n'}
-            招待リンクから参加できます
-            </Text>
           </View>
         </View>
 
@@ -278,29 +281,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingHorizontal: 40,
     lineHeight: 18,
-  },
-  inviteInfo: {
-    width: '100%',
-    backgroundColor: '#FFFFFF',
-    padding: 24,
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  inviteTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333333',
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  inviteText: {
-    fontSize: 14,
-    color: '#666666',
-    textAlign: 'center',
-    lineHeight: 20,
   },
 });

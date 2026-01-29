@@ -1,78 +1,49 @@
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { InviteService } from '@/services/invite.service';
-import { UserService } from '@/services/user.service';
-import { useAuth } from '@/hooks/use-auth';
-import { InviteErrorCode, InviteErrorCodes } from '@/domain/invite/invite.errors';
-import { UserErrorCode, UserErrorCodes } from '@/domain/user/user.error';
-import { useInvite } from '@/hooks/use-invite';
-import { OwnerToFamilyService } from '@/services/owner-to-family.service';
+import { useAuth } from '@/hooks/use-auth'
+
+type Status = 'verifying' | 'invalid' | 'ready'
 
 export default function InviteTokenScreen() {
   const router = useRouter();
-  const { authUser } = useAuth();
-  const [error, setError] = useState<string | null>(null);
-  const [isVerifying, setIsVerifying] = useState(true);
-  const { invite, clearInviteData } = useInvite();
+  const { authUser } = useAuth()
+  const { token } = useLocalSearchParams<{ token?: string }>()
+  const [status, setStatus] = useState<Status>('verifying')
 
   useEffect(() => {
-    verifyAndNavigate();
-  }, [invite, authUser]);
+    const run = async () => {
+      if (!token || typeof token !== 'string') {
+        setStatus('invalid')
+        return
+      }
+  
+      // 招待を検証
+      const ok = await InviteService.verifyInvite(token);
+      if (!ok) {
+        setStatus('invalid')
+        return;
+      }
 
-  const verifyAndNavigate = async () => {
-    if (!invite || !authUser) return;
-
-    setIsVerifying(true);
-
-    // 招待を検証
-    const verifyResult = await InviteService.verifyInvite(invite);
-    if (!verifyResult.ok) {
-      setError(verifyErrorMessage(verifyResult.error.code));
-      setIsVerifying(false);
-      clearInviteData();
-      return;
+      if (!authUser) {
+        // ログイン画面へ：招待で来た情報をURLで引き回す
+        router.replace({
+          pathname: '/login',
+          params: {
+            next: '/(auth)/invite/confirm',
+            token,
+          },
+        })
+        return
+      }
     }
 
-    // 参加可能かチェック
-    const canJoinResult = await UserService.canJoinFamily(authUser.uid);
-    if (!canJoinResult.ok) {
-      setError(joinFamilyMessage(canJoinResult.error.code));
-      setIsVerifying(false);
-      clearInviteData();
-      return;
-    }
+    run()
+  }, [token, authUser]);
 
 
-    const joinUser = await UserService.get(authUser.uid);
-    if (joinUser) {
-        await OwnerToFamilyService.toFamily(invite.familyId)
-    }
-  };
-
-  const verifyErrorMessage = (code: InviteErrorCode) => {
-    switch (code) {
-      case InviteErrorCodes.Expired:
-        return '招待の有効期限が切れています';
-      case InviteErrorCodes.InvalidToken:
-        return '使用不可能な招待リンクです'
-      case InviteErrorCodes.AlreadyUsed:
-        return 'この招待は既に使用されています'
-      default:
-        return '招待の確認中にエラーが発生しました'
-    }
-  }
-
-  const joinFamilyMessage = (code: UserErrorCode) => {
-    switch (code) {
-      case UserErrorCodes.AlreadyInFamily:
-        return '既に他の家族に所属しているため、参加できません'
-      default:
-        return '招待の確認中にエラーが発生しました'
-    }
-  }
-
-  if (isVerifying) {
+  if (status === 'verifying') {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#4A90E2" />
@@ -81,12 +52,11 @@ export default function InviteTokenScreen() {
     );
   }
 
-  if (error) {
+  if (status === 'invalid') {
     return (
       <View style={styles.container}>
         <Text style={styles.errorIcon}>⚠️</Text>
         <Text style={styles.errorTitle}>招待リンクが無効です</Text>
-        <Text style={styles.errorMessage}>{error}</Text>
         <Text
           style={styles.backButton}
           onPress={() => router.replace('/')}

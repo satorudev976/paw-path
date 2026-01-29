@@ -6,7 +6,6 @@ import { useAuth } from '@/hooks/use-auth'
 import { useUser } from '@/hooks/use-user'
 import { useSubscription } from '@/hooks/use-subscription'
 import { useAppAccess } from '@/hooks/use-app-access'
-import { useInvite } from '@/hooks/use-invite';
 
 
 export default function Index() {
@@ -16,16 +15,10 @@ export default function Index() {
   const { user, isLoading: userLoading } = useUser()
   const { isLoading: subscriptionLoading } = useSubscription()
   const { isLoading: appAccessLoading } = useAppAccess()
-  const { invite } = useInvite();
 
   useEffect(() => {
     // 判定中
     if (authLoading || userLoading || subscriptionLoading || appAccessLoading) return
-
-    if (invite) {
-      router.replace(`/(auth)/invite/${invite.token}`)
-      return
-    }
 
     // 未ログイン（新規ユーザー、ログアウト後のユーザー）
     if (!authUser) {

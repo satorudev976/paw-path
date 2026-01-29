@@ -13,6 +13,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/infrastructure/firebase/firebase';
 import { Invite } from '@/domain/entities/invite';
+import { CloudFunction } from "../function/functions.client";
 
 export const inviteRepository = {
 
@@ -83,5 +84,9 @@ export const inviteRepository = {
     await batch.commit();
     console.log(`招待削除: ${invitesSnapshot.size}件`);
   },
+
+  async verifyInvite(token: string): Promise<boolean> {
+    return await CloudFunction.call("verifyInvite", { token })
+  }
 
 };
