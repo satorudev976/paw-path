@@ -1,18 +1,16 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>家族への招待 - PawPath</title>
+
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+        "Helvetica Neue", Arial, sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
       display: flex;
@@ -52,7 +50,7 @@
 
     .status {
       background: #f0f7ff;
-      border: 2px solid #4A90E2;
+      border: 2px solid #4a90e2;
       border-radius: 12px;
       padding: 20px;
       margin-bottom: 24px;
@@ -60,23 +58,21 @@
 
     .status-text {
       font-size: 15px;
-      color: #4A90E2;
+      color: #4a90e2;
       font-weight: 500;
     }
 
     .button {
       display: inline-block;
-      background: #4A90E2;
+      background: #4a90e2;
       color: white;
       padding: 16px 40px;
       border-radius: 12px;
-      text-decoration: none;
       font-size: 18px;
       font-weight: bold;
       margin: 8px;
       cursor: pointer;
       border: none;
-      font-family: inherit;
       width: 100%;
       max-width: 300px;
     }
@@ -85,14 +81,9 @@
       transform: scale(0.98);
     }
 
-    .button.secondary {
-      background: #f0f0f0;
-      color: #666;
-    }
-
     .spinner {
       border: 3px solid #f3f3f3;
-      border-top: 3px solid #4A90E2;
+      border-top: 3px solid #4a90e2;
       border-radius: 50%;
       width: 40px;
       height: 40px;
@@ -105,20 +96,6 @@
       100% { transform: rotate(360deg); }
     }
 
-    .warning {
-      background: #fff3cd;
-      border: 2px solid #ffc107;
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 24px;
-    }
-
-    .warning-text {
-      font-size: 14px;
-      color: #856404;
-      line-height: 1.6;
-    }
-
     .help-text {
       font-size: 14px;
       color: #999;
@@ -129,163 +106,161 @@
     .hidden {
       display: none;
     }
+
+    /* ダウンロードバッジ */
+    .download {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .download img {
+      max-width: 250px;
+      height: auto;
+    }
   </style>
 </head>
+
 <body>
   <div class="container">
     <div class="icon">🐾</div>
-    <h1>家族への招待</h1>
-    <p class="message">
-      PawPathの家族グループへの招待です
-    </p>
 
-    <!-- Loading状態 -->
+    <h1>家族への招待</h1>
+    <p class="message">PawPathの家族グループへの招待です</p>
+
+    <!-- Loading -->
     <div id="loading-state">
       <div class="spinner"></div>
       <div class="status-text">アプリを起動しています...</div>
     </div>
 
-    <!-- LINE内ブラウザ警告 -->
-    <div id="line-warning" class="hidden">
-      <div class="warning">
-        <div class="warning-text">
-          ⚠️ LINE内ブラウザでは正しく動作しません<br>
-          下記のボタンから「Safariで開く」を選択してください
-        </div>
-      </div>
-      <button class="button" onclick="openInSafari()">
-        Safariで開く
-      </button>
-      <button class="button secondary" onclick="openApp()">
-        アプリで開く
-      </button>
-      <p class="help-text">
-        ※ 画面右下の「︙」メニュー →「Safariで開く」からも開けます
-      </p>
-    </div>
-
-    <!-- 手動操作を促す -->
+    <!-- 手動で開く -->
     <div id="manual-open" class="hidden">
       <div class="status">
         <div class="status-text">
-          アプリが開かない場合は<br>
+          アプリが開かない場合は<br />
           下記のボタンをタップしてください
         </div>
       </div>
-      <button class="button" onclick="openApp()">
+
+      <button class="button" onclick="openAppWithFallback()">
         アプリで開く
       </button>
-      <button class="button secondary" onclick="fallbackToWeb()">
-        Webで続ける
-      </button>
+
+      <p class="help-text">
+        ※ アプリが未インストールの場合は、次の画面でインストール案内が表示されます
+      </p>
     </div>
 
-    <!-- アプリ未インストール -->
+    <!-- 未インストール -->
     <div id="install-prompt" class="hidden">
       <div class="status">
         <div class="status-text">アプリがインストールされていません</div>
       </div>
+
       <p class="message">
-        アプリをインストールして<br>
+        アプリをインストールして<br />
         家族グループに参加しましょう
       </p>
-      <a href="https://apps.apple.com/app/your-app-id" class="button" target="_blank">
-        App Storeからダウンロード
-      </a>
-      <button class="button secondary" onclick="fallbackToWeb()">
-        Webで続ける
-      </button>
+
+      <!-- ダウンロードバッジ -->
+      <div class="download">
+        <!-- App Store -->
+        <a
+          href="https://apps.apple.com/app/your-app-id"
+          target="_blank"
+          rel="noopener"
+        >
+          <img
+            src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/ja-jp?size=250x83"
+            alt="Download on the App Store"
+          />
+        </a>
+
+        <!-- Google Play -->
+        <a
+          href="https://play.google.com/store/apps/details?id=com.satoru.pawpath"
+          target="_blank"
+          rel="noopener"
+        >
+          <img
+            src="https://play.google.com/intl/ja/badges/static/images/badges/ja_badge_web_generic.png"
+            alt="Google Play で手に入れよう"
+            style="height: 72px; margin-top: -11px;"
+          />
+        </a>
+      </div>
+
       <p class="help-text">
-        アプリをインストール後、<br>
-        再度この招待リンクを開いてください
+        インストール後、再度この招待リンクを開いてください
       </p>
     </div>
   </div>
 
   <script>
-    // URLパラメータからトークンを取得
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token');
+    // token取得
+    const token = new URLSearchParams(window.location.search).get("token");
 
-    // LINE内ブラウザを判定
-    function isLineApp() {
-      const ua = navigator.userAgent.toLowerCase();
-      return ua.includes('line');
+    // pawpath://invite/[token]
+    function buildAppScheme(token) {
+      return `pawpath://invite/${encodeURIComponent(token)}`;
     }
 
-    // アプリを開く関数
+    function showOnly(id) {
+      ["loading-state", "manual-open", "install-prompt"].forEach((x) => {
+        document.getElementById(x)?.classList.add("hidden");
+      });
+      document.getElementById(id)?.classList.remove("hidden");
+    }
+
+    function setTitleAndMessage(title, message) {
+      document.querySelector("h1").textContent = title;
+      document.querySelector(".message").textContent = message;
+    }
+
     function openApp() {
+      if (!token) return;
+      window.location.href = buildAppScheme(token);
+    }
+
+    // 開けなかったら手動 → インストール誘導
+    function setupFallbackTimers() {
+      setTimeout(() => {
+        if (!document.hidden) {
+          showOnly("manual-open");
+
+          setTimeout(() => {
+            if (!document.hidden) {
+              showOnly("install-prompt");
+            }
+          }, 4000);
+        }
+      }, 1200);
+    }
+
+    // ボタン連打防止
+    let isTrying = false;
+    function openAppWithFallback() {
+      if (isTrying) return;
+      isTrying = true;
+      openApp();
+      setupFallbackTimers();
+      setTimeout(() => (isTrying = false), 1500);
+    }
+
+    // Main
+    (function main() {
       if (!token) {
-        alert('招待トークンが見つかりません');
+        setTitleAndMessage("無効なリンク", "招待トークンが見つかりません");
         return;
       }
-      // expo-routerの形式: pawpath://invite/[token]
-      const appScheme = `pawpath://invite/${token}`;
-      window.location.href = appScheme;
-    }
 
-    // Safariで開く（実際にはユーザーが手動で操作する必要がある）
-    function openInSafari() {
-      // LINEの場合、自動でSafariに遷移できないため案内のみ
-      alert('画面右下の「︙」メニューから「Safariで開く」を選択してください');
-    }
-
-    // Webにフォールバック
-    function fallbackToWeb() {
-      window.location.href = `/?token=${token}`;
-    }
-
-    // メイン処理
-    if (!token) {
-      // トークンがない場合はエラー
-      document.getElementById('loading-state').classList.add('hidden');
-      document.querySelector('h1').textContent = '無効なリンク';
-      document.querySelector('.message').textContent = '招待トークンが見つかりません';
-    } else if (isLineApp()) {
-      // LINE内ブラウザの場合は警告を表示
-      document.getElementById('loading-state').classList.add('hidden');
-      document.getElementById('line-warning').classList.remove('hidden');
-    } else {
-      // 通常のブラウザの場合、自動的にアプリを開く
-      let attemptCount = 0;
-      const maxAttempts = 2;
-
-      function tryOpenApp() {
-        attemptCount++;
-        openApp();
-
-        // 2.5秒後にアプリが開かなかった場合
-        setTimeout(() => {
-          if (attemptCount < maxAttempts) {
-            // もう一度試行
-            tryOpenApp();
-          } else {
-            // 手動操作を促す
-            document.getElementById('loading-state').classList.add('hidden');
-            document.getElementById('manual-open').classList.remove('hidden');
-
-            // さらに5秒後もアプリが開かなければインストールを促す
-            setTimeout(() => {
-              const isStillOnPage = !document.hidden;
-              if (isStillOnPage) {
-                document.getElementById('manual-open').classList.add('hidden');
-                document.getElementById('install-prompt').classList.remove('hidden');
-              }
-            }, 5000);
-          }
-        }, 2500);
-      }
-
-      // 初回試行
-      tryOpenApp();
-
-      // visibilitychange イベントでページが非表示になったかチェック
-      document.addEventListener('visibilitychange', () => {
-        if (document.hidden) {
-          console.log('アプリが開きました');
-        }
-      });
-    }
+      showOnly("loading-state");
+      openApp();
+      setupFallbackTimers();
+    })();
   </script>
 </body>
 </html>
