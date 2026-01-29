@@ -14,16 +14,13 @@ import {
 import { setUpOwnerService } from '@/services/setup-owner.service';
 import { useAuth } from '@/hooks/use-auth';
 import { useUser } from '@/hooks/use-user';
-import { useInvite } from '@/hooks/use-invite';
 import { NicknameErrorCode, NicknameErrorCodes } from '@/domain/profile/nickname.errors';
-import { InviteJoinService } from '@/services/invite-join.service';
 import { UserProfileService } from '@/services/user-profile.service';
 
 export default function NicknameScreen() {
   const router = useRouter();
   const { authUser } = useAuth();
   const { user, refresh } = useUser();
-  const { invite, clearInviteData } = useInvite();
   
   const [nickname, setNickname] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -56,20 +53,11 @@ export default function NicknameScreen() {
     }
     
     try {
-      if (invite) {
-        if (authUser) {
-          await InviteJoinService.joinFamily(invite, authUser.uid, nickname.trim());
-        }
-      } else {
-        await setUpOwnerService.setUp(authUser!.uid, nickname.trim());
-      }
+      await setUpOwnerService.setUp(authUser!.uid, nickname.trim());
       refresh();
     } catch (error: any) {
       console.error('セットアップエラー:', error);
     } finally {
-      if (invite) {
-        clearInviteData();
-      }
       setIsLoading(false);
     }
   };
