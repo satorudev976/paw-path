@@ -218,10 +218,10 @@ export default function OwnwerSettingsScreen() {
                   style={[
                     styles.fullButton, 
                     styles.shareButton,
-                    members.length >= 5 && styles.shareButtonDisabled
+                    (members.length >= 5 || readonly) && styles.shareButtonDisabled
                   ]}
-                  onPress={members.length < 5 ? handleInvite : undefined}
-                  disabled={members.length >= 5}
+                  onPress={members.length < 5 && !readonly ? handleInvite : undefined}
+                  disabled={members.length >= 5 || readonly}
                 >
                   <Ionicons 
                     name="share-outline" 
