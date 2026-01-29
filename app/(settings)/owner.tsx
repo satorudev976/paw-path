@@ -210,7 +210,7 @@ export default function OwnwerSettingsScreen() {
               <Text style={styles.sectionTitle}>家族を招待</Text>
               <View style={styles.buttonColumn}>
                 <Text style={styles.inviteDescription}>
-                  家族をアプリに招待して、散歩記録を共有しましょう
+                  家族をアプリに招待して、共有しましょう
                 </Text>
 
                 {/* 共有ボタン */}
