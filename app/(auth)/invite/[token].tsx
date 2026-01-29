@@ -20,18 +20,25 @@ export default function InviteTokenScreen() {
       }
   
       // 招待を検証
-      const ok = await InviteService.verifyInvite(token);
-      if (!ok) {
+      try {
+        const ok = await InviteService.verifyInvite(token);
+        if (!ok) {
+          setStatus('invalid')
+          return;
+        }
+      } catch (error) {
+        console.error('verifyInvite failed', error);
         setStatus('invalid')
         return;
       }
+      
 
       if (!authUser) {
         // ログイン画面へ：招待で来た情報をURLで引き回す
         router.replace({
           pathname: '/login',
           params: {
-            next: '/(auth)/invite/confirm',
+            next: '/invite/confirm',
             token,
           },
         })

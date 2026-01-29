@@ -86,7 +86,8 @@ export const inviteRepository = {
   },
 
   async verifyInvite(token: string): Promise<boolean> {
-    return await CloudFunction.call("verifyInvite", { token })
+    const result = await CloudFunction.call("verifyInvite", { token })
+    return result.valid
   }
 
 };
