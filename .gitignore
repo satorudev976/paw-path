@@ -45,3 +45,7 @@ app-example
 .env.development
 
 .firebase
+
+# Compiled JavaScript files
+firebase/functions/lib/**/*.js
+firebase/functions/lib/**/*.js.map
