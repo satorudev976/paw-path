@@ -117,15 +117,14 @@ export default function OwnwerSettingsScreen() {
                   <View style={styles.subscriptionStatus}>
                     <Ionicons 
                       name={
-                        readonly ? 'checkmark-circle' : 
-                        trialUse ? 'time' : 
-                        'eye-outline'
+                        trialUse ? 'time': 
+                        readonly ? 'eye-outline' : 'checkmark-circle'
                       } 
                       size={24} 
                       color={
-                        readonly ? '#50C878' : 
-                        trialUse ? '#FF9500' : 
-                        '#999999'
+                        trialUse ? '#999999' : 
+                        readonly ? '#FF9500' : '#50C878'
+                        
                       } 
                     />
                     <Text style={styles.subscriptionPlan}>
