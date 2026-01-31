@@ -11,16 +11,30 @@ type LatLng = {
 export function useRouteAnimation(mapRef: React.RefObject<MapView | null>) {
   const [animatingWalkId, setAnimatingWalkId] = useState<string | null>(null)
   const [markerPosition, setMarkerPosition] = useState<LatLng | null>(null)
+  const [currentWalk, setCurrentWalk] = useState<Walk | null>(null)
 
   const animationProgress = useRef(new Animated.Value(0)).current
   const animationTriggered = useRef<string | null>(null)
 
-  // cleanup（listener 多重登録防止）
+  // リスナーをuseEffectで管理（listener leak防止）
   useEffect(() => {
+    if (!currentWalk) return
+
+    const listenerId = animationProgress.addListener(({ value }) => {
+      const index = Math.floor(value)
+      if (index < currentWalk.routePoints.length) {
+        setMarkerPosition({
+          latitude: currentWalk.routePoints[index].latitude,
+          longitude: currentWalk.routePoints[index].longitude,
+        })
+      }
+    })
+
+    // cleanup時にリスナーを削除
     return () => {
-      animationProgress.removeAllListeners()
+      animationProgress.removeListener(listenerId)
     }
-  }, [])
+  }, [currentWalk, animationProgress])
 
   const startAnimation = (
     walk: Walk,
@@ -33,6 +47,7 @@ export function useRouteAnimation(mapRef: React.RefObject<MapView | null>) {
     animationTriggered.current = key
 
     setAnimatingWalkId(walk.walkId)
+    setCurrentWalk(walk)
     animationProgress.setValue(0)
 
     // Map をルートにフィット
@@ -58,18 +73,8 @@ export function useRouteAnimation(mapRef: React.RefObject<MapView | null>) {
       setTimeout(() => {
         setAnimatingWalkId(null)
         setMarkerPosition(null)
+        setCurrentWalk(null)
       }, 3000)
-    })
-
-    animationProgress.removeAllListeners()
-    animationProgress.addListener(({ value }) => {
-      const index = Math.floor(value)
-      if (index < walk.routePoints.length) {
-        setMarkerPosition({
-          latitude: walk.routePoints[index].latitude,
-          longitude: walk.routePoints[index].longitude,
-        })
-      }
     })
   }
 
