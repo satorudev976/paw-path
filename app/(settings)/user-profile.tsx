@@ -128,12 +128,8 @@ export default function UserProfileScreen() {
 
       const result = await AccountDeletionService.deleteAccount(user.id);
 
-      if (result === true) {
-        console.log('✅ アカウント削除完了');
-        // 削除成功（自動的にログイン画面にリダイレクトされる）
-      } else {
-        // エラー
-        const errorMessage = getAccountDeletionErrorMessage(result.error);
+      if (!result.ok) {
+        const errorMessage = getAccountDeletionErrorMessage(result.error.code);
         Alert.alert('エラー', errorMessage);
       }
     } catch (error: any) {

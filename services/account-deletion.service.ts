@@ -3,14 +3,9 @@ import { userRepository } from '@/infrastructure/firebase/repositories/user.repo
 import { inviteRepository } from '@/infrastructure/firebase/repositories/invite.repository';
 import { walkRepository } from '@/infrastructure/firebase/repositories/walk.repository';
 import { familyRepository } from '@/infrastructure/firebase/repositories/family.repository';
-/**
- * アカウント削除のエラー型
- */
-export type AccountDeletionError =
-  | 'user-not-found'              // ユーザーが見つからない
-  | 'owner-has-members'           // オーナーで他にメンバーがいる
-  | 'unknown';                    // その他のエラー
-
+import { UserDeleteError, UserDeleteErrorCodes } from '@/domain/user/user.error';
+import { err, ok, type Result } from '@/domain/shared/result'
+import { makeError } from '@/domain/shared/errorFactory'
 /**
  * アカウント削除サービス
  */
@@ -21,18 +16,18 @@ export const AccountDeletionService = {
    * @param userId ユーザーID
    * @returns 成功時はtrue、失敗時はエラー型
    */
-  async deleteAccount(userId: string): Promise<true | { error: AccountDeletionError }> {
+  async deleteAccount(userId: string): Promise<Result<void, UserDeleteError>> {
     try {
       const user = await userRepository.findById(userId);
       if (!user) {
-        return { error: 'user-not-found' };
+        return err(makeError(UserDeleteErrorCodes.Unknown));
       }
 
       if (user.role === 'owner') {
         const count = await userRepository.countByFamilyId(user.familyId);
         // オーナーの場合、他にメンバーがいるかチェック
         if (count > 1) {
-          return { error: 'owner-has-members' };
+          return err(makeError(UserDeleteErrorCodes.OwnerHasMembers));
         }
       }
       console.log('🗑️ ユーザーデータを削除:', userId, `(${user.role})`);
@@ -46,10 +41,10 @@ export const AccountDeletionService = {
       await userRepository.delete(user.id);
       console.log('✅ ユーザードキュメント削除完了');
       await auth.signOut();
-      return true;
+      return ok(undefined);
     } catch (error) {
       console.error('アカウント削除エラー:', error);
-      return { error: 'unknown' };
+      return err(makeError(UserDeleteErrorCodes.Unknown));
     }
   },
 

@@ -1,11 +1,11 @@
 import type { AppError } from '@/domain/shared/appError'
 
-export const UserErrorCodes = {
-  AlreadyInFamily: 'already-in-family',
+export const UserDeleteErrorCodes = {
+  OwnerHasMembers: 'owner-has-members',
   Unknown: 'unknown',
 } as const
 
-export type UserErrorCode =
-  typeof UserErrorCodes[keyof typeof UserErrorCodes]
+export type UserDeleteErrorCode =
+  typeof UserDeleteErrorCodes[keyof typeof UserDeleteErrorCodes]
 
-export type UserError = AppError<UserErrorCode>
+export type UserDeleteError = AppError<UserDeleteErrorCode>
