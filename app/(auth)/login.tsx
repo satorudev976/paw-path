@@ -173,23 +173,24 @@ export default function LoginScreen() {
         </View>
 
         {/* ステップ2: 招待 */}
-        <View style={styles.stepContainer}>
-          <View style={styles.stepHeader}>
-            <View style={styles.stepDivider} />
-            <Text style={styles.stepLabel}>家族から招待された方</Text>
-            <View style={styles.stepDivider} />
-          </View>
+        {!Boolean(params?.next && params?.token) && (
+          <View style={styles.stepContainer}>
+            <View style={styles.stepHeader}>
+              <View style={styles.stepDivider} />
+              <Text style={styles.stepLabel}>家族から招待された方</Text>
+              <View style={styles.stepDivider} />
+            </View>
 
-          {/* 招待リンク案内 */}
-          <View style={styles.inviteInfo}>
-          <Text style={styles.inviteTitle}>👨‍👩‍👧‍👦 家族から招待されましたか?</Text>
-            <Text style={styles.inviteText}>
-              家族から招待リンクを送られた方は{'\n'}
-            招待リンクから参加できます
-            </Text>
+            {/* 招待リンク案内 */}
+            <View style={styles.inviteInfo}>
+            <Text style={styles.inviteTitle}>👨‍👩‍👧‍👦 家族から招待されましたか?</Text>
+              <Text style={styles.inviteText}>
+                家族から招待リンクを送られた方は{'\n'}
+              招待リンクから参加できます
+              </Text>
+            </View>
           </View>
-        </View>
-
+        )}
       </View>
     </SafeAreaView>
   );
