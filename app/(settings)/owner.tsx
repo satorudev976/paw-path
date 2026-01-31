@@ -136,7 +136,7 @@ export default function OwnwerSettingsScreen() {
                   <Ionicons name="chevron-forward" size={20} color="#CCCCCC" />
                 </View>
 
-                {/* トライアル表示 */}
+                {/* お試し期間表示 */}
                 {trialUse && (
                   <View style={styles.trialBadge}>
                     <Ionicons name="time-outline" size={16} color="#FF9500" />

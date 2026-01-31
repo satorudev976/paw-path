@@ -175,7 +175,7 @@ export default function SubscriptionScreen() {
           <View style={styles.trialBanner}>
             <Ionicons name="gift" size={28} color="#FF9500" />
             <View style={styles.trialInfo}>
-              <Text style={styles.trialTitle}>トライアル中</Text>
+              <Text style={styles.trialTitle}>お試し期間中</Text>
               <Text style={styles.trialSubtitle}>
                 お試し期間は７日間です。
               </Text>
@@ -332,7 +332,6 @@ export default function SubscriptionScreen() {
             • サブスクリプションは自動更新されます{'\n'}
             • 解約はいつでも可能です{'\n'}
             • 家族メンバーは追加料金なしで利用できます{'\n'}
-            • トライアル期間中はいつでもキャンセル可能です
           </Text>
         </View>
       </ScrollView>
