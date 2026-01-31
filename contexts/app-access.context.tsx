@@ -2,6 +2,7 @@ import { createContext, useEffect } from 'react'
 import { AppState } from 'react-native'
 import { useSubscription } from '@/hooks/use-subscription'
 import { useFamily } from '@/hooks/use-family'
+import { useUser } from '@/hooks/use-user'
 
 export type AppAccess = 'active' | 'readOnly'
 
@@ -17,6 +18,7 @@ export const AppAccessContext =
 export const AppAccessProvider: React.FC<{
   children: React.ReactNode
 }> = ({ children }) => {
+  const { user } = useUser()
   const { hasEntitlement, isLoading: subLoading } = useSubscription()
   const { family, isLoading: familyLoading, refresh } = useFamily()
 
@@ -25,24 +27,27 @@ export const AppAccessProvider: React.FC<{
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (nextAppState) => {
       if (nextAppState === 'active') {
-        console.log('アプリがフォアグラウンドに復帰 - familyデータをリフレッシュ')
-        refresh()
+        // ログインしている場合のみリフレッシュ
+        if (user) {
+          console.log('アプリがフォアグラウンドに復帰 - familyデータをリフレッシュ')
+          refresh()
+        }
       }
     })
 
     return () => {
       subscription.remove()
     }
-  }, [refresh])
+  }, [refresh, user])
 
-    // 読み取り専用かどうかを判定
-    const readonly = (() => {
-      if (isLoading) return false
-      if (!family) return true
-      if (hasEntitlement) return false
-      if (family.trialEndAt > new Date()) return false
-      return true
-    })()
+  // 読み取り専用かどうかを判定
+  const readonly = (() => {
+    if (isLoading) return false
+    if (!family) return true
+    if (hasEntitlement) return false
+    if (family.trialEndAt > new Date()) return false
+    return true
+  })()
 
   // アプリお試し期間中かどうかを判定
   const trialUse = (() => {
@@ -50,7 +55,6 @@ export const AppAccessProvider: React.FC<{
     if (hasEntitlement) return false
     return family.trialEndAt > new Date()
   })()
-
 
   return (
     <AppAccessContext.Provider value={{ readonly, trialUse, isLoading }}>
