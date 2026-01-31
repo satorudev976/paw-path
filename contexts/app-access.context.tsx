@@ -35,13 +35,14 @@ export const AppAccessProvider: React.FC<{
     }
   }, [refresh])
 
-  // 読み取り専用かどうかを判定
-  const readonly = (() => {
-    if (isLoading || !family) return true
-    if (hasEntitlement) return false
-    if (family.trialEndAt > new Date()) return false
-    return true
-  })()
+    // 読み取り専用かどうかを判定
+    const readonly = (() => {
+      if (isLoading) return false
+      if (!family) return true
+      if (hasEntitlement) return false
+      if (family.trialEndAt > new Date()) return false
+      return true
+    })()
 
   // アプリお試し期間中かどうかを判定
   const trialUse = (() => {
