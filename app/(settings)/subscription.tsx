@@ -67,7 +67,7 @@ export default function SubscriptionScreen() {
   const handlePurchase = async (plan: PurchasesPackage) => {
     try {
       const success = await SubscriptionService.purchasePackage(plan)
-
+  
       if (success) {
         Alert.alert('購入完了！', 'サブスクリプションが有効になりました。', [
           {
@@ -78,14 +78,16 @@ export default function SubscriptionScreen() {
             },
           },
         ])
-      } else {
-        Alert.alert('エラー', '購入に失敗しました')
-      }
-    } catch (error: any) {
-      if (error?.message === 'CANCELLED') {
-        // ユーザーキャンセル - 何もしない
         return
       }
+      // ❗ success === false は「キャンセル」か「entitlement付与なし」
+      // キャンセルは正常なので何もしない
+      return
+  
+    } catch (error: any) {
+      // purchasePackage側でキャンセルは握りつぶしているので
+      // ここに来るのは基本「本当のエラー」だけ
+  
       console.error('購入エラー:', error)
       Alert.alert('エラー', '購入処理中にエラーが発生しました')
     }

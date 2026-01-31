@@ -40,16 +40,27 @@ export const SubscriptionService = {
     return null
   },
 
-  async purchasePackage(packageToPurchase: PurchasesPackage): Promise<boolean> {
-    const { customerInfo } =
-    await Purchases.purchasePackage(packageToPurchase)
-
-    return Boolean(
-      customerInfo.entitlements.active[
+  async purchasePackage(pkg: PurchasesPackage): Promise<boolean> {
+    try {
+      const { customerInfo } = await Purchases.purchasePackage(pkg)
+  
+      const entitlementId =
         Constants.expoConfig?.extra?.revenuCat?.entitlement
-      ]
-    )
-  },
+  
+      return Boolean(
+        entitlementId &&
+          customerInfo.entitlements.active[entitlementId]
+      )
+    } catch (e: any) {
+      // ✅ ユーザーキャンセルは正常終了
+      if (e?.userCancelled) {
+        return false
+      }
+  
+      throw e
+    }
+  }
+  ,
 
   async restorePurchases(): Promise<boolean> {
     const customerInfo = await Purchases.restorePurchases()
