@@ -6,6 +6,7 @@ import { Family } from '@/domain/entities/family'
 type FamilyContextValue = {
   family: Family | null
   isLoading: boolean
+  refresh: () => Promise<void>
 }
 
 export const FamilyContext = createContext<FamilyContextValue | null>(null)
@@ -38,8 +39,13 @@ export const FamilyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     loadFamily(user?.familyId)
   }, [user])
 
+  const refresh = async () => {
+    if (!user?.familyId) return
+    await loadFamily(user.familyId)
+  }
+
   return (
-    <FamilyContext.Provider value={{ family, isLoading }}>
+    <FamilyContext.Provider value={{ family, isLoading, refresh }}>
       {children}
     </FamilyContext.Provider>
   )

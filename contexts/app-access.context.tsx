@@ -1,4 +1,5 @@
-import { createContext } from 'react'
+import { createContext, useEffect } from 'react'
+import { AppState } from 'react-native'
 import { useSubscription } from '@/hooks/use-subscription'
 import { useFamily } from '@/hooks/use-family'
 
@@ -17,9 +18,22 @@ export const AppAccessProvider: React.FC<{
   children: React.ReactNode
 }> = ({ children }) => {
   const { hasEntitlement, isLoading: subLoading } = useSubscription()
-  const { family, isLoading: familyLoading } = useFamily()
+  const { family, isLoading: familyLoading, refresh } = useFamily()
 
   const isLoading = subLoading || familyLoading
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
+      if (nextAppState === 'active') {
+        console.log('アプリがフォアグラウンドに復帰 - familyデータをリフレッシュ')
+        refresh()
+      }
+    })
+
+    return () => {
+      subscription.remove()
+    }
+  }, [refresh])
 
   // 読み取り専用かどうかを判定
   const readonly = (() => {
