@@ -2,53 +2,53 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { InviteService } from '@/services/invite.service';
-import { useAuth } from '@/hooks/use-auth'
+import { useAuth } from '@/hooks/use-auth';
 
-type Status = 'verifying' | 'invalid' | 'ready'
+type Status = 'verifying' | 'invalid' | 'ready';
 
 export default function InviteTokenScreen() {
   const router = useRouter();
-  const { authUser } = useAuth()
-  const { token } = useLocalSearchParams<{ token?: string }>()
-  const [status, setStatus] = useState<Status>('verifying')
+  const { authUser } = useAuth();
+  const { token } = useLocalSearchParams<{ token?: string }>();
+  const [status, setStatus] = useState<Status>('verifying');
 
   useEffect(() => {
     const run = async () => {
       if (!token || typeof token !== 'string') {
-        setStatus('invalid')
-        return
-      }
-  
-      // 招待を検証
-      try {
-        const ok = await InviteService.verifyInvite(token);
-        if (!ok) {
-          setStatus('invalid')
-          return;
-        }
-      } catch (error) {
-        console.error('verifyInvite failed', error);
-        setStatus('invalid')
+        setStatus('invalid');
         return;
       }
-      
+
+      // 招待を検証
+      const ok = await InviteService.verifyInvite(token);
+      if (!ok) {
+        setStatus('invalid');
+        return;
+      }
 
       if (!authUser) {
         // ログイン画面へ：招待で来た情報をURLで引き回す
         router.replace({
           pathname: '/login',
           params: {
-            next: '/invite/confirm',
+            next: '/(auth)/invite/invite-resolve',
             token,
           },
-        })
-        return
+        });
+        return;
       }
-    }
 
-    run()
+      // 認証済みの場合は resolve 画面へ
+      router.replace({
+        pathname: '/(auth)/invite/invite-resolve',
+        params: {
+          token,
+        },
+      });
+    };
+
+    run();
   }, [token, authUser]);
-
 
   if (status === 'verifying') {
     return (
@@ -64,10 +64,7 @@ export default function InviteTokenScreen() {
       <View style={styles.container}>
         <Text style={styles.errorIcon}>⚠️</Text>
         <Text style={styles.errorTitle}>招待リンクが無効です</Text>
-        <Text
-          style={styles.backButton}
-          onPress={() => router.replace('/')}
-        >
+        <Text style={styles.backButton} onPress={() => router.replace('/')}>
           戻る
         </Text>
       </View>
@@ -99,13 +96,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 12,
-  },
-  errorMessage: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 32,
-    lineHeight: 24,
   },
   backButton: {
     fontSize: 16,
