@@ -38,6 +38,7 @@ export const SubscriptionProvider: React.FC<{
     } catch (error) {
       console.error('サブスクリプション状態の取得エラー:', error)
       setHasEntitlement(false)
+      setActiveProductType(null)
     } finally {
       setIsLoading(false)
     }
