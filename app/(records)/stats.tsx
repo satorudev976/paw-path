@@ -251,42 +251,50 @@ export default function StatsView() {
           {/* 散歩履歴 */}
           <View style={styles.historySection}>
             <Text style={styles.historyTitle}>散歩履歴</Text>
-            {walks.map((walk) => (
-              <Swipeable
-                key={walk.walkId}
-                ref={(ref) => {
-                  if (ref) {
-                    swipeableRefs.current.set(walk.walkId, ref);
+            {walks.map((walk) => {
+              // 自分の記録のみ削除可能
+              const canDelete = walk.recordedBy === user?.id;
+
+              return (
+                <Swipeable
+                  key={walk.walkId}
+                  ref={(ref) => {
+                    if (ref) {
+                      swipeableRefs.current.set(walk.walkId, ref);
+                    }
+                  }}
+                  renderRightActions={
+                    canDelete 
+                      ? (progress, dragX) => renderRightActions(walk, progress, dragX)
+                      : undefined // 削除不可の場合はスワイプアクションなし
                   }
-                }}
-                renderRightActions={(progress, dragX) => 
-                  renderRightActions(walk, progress, dragX)
-                }
-                overshootRight={false}
-                rightThreshold={40}
-              >
-                <TouchableOpacity
-                  style={styles.historyItem}
-                  onPress={() => handleWalkPress(walk)}
-                  activeOpacity={0.7}
+                  overshootRight={false}
+                  rightThreshold={40}
+                  enabled={canDelete} // スワイプ自体を無効化
                 >
-                  <View style={styles.historyInfo}>
-                    <Text style={styles.historyDate}>
-                      {walk.startTime.getMonth() + 1}/{walk.startTime.getDate()} ({['日', '月', '火', '水', '木', '金', '土'][walk.startTime.getDay()]})
-                    </Text>
-                    <Text style={styles.historyTime}>
-                      {walk.startTime.getHours().toString().padStart(2, '0')}:
-                      {walk.startTime.getMinutes().toString().padStart(2, '0')}
-                    </Text>
-                  </View>
-                  <View style={styles.historyStats}>
-                    <Text style={styles.historyDistance}>{formatDistance(walk.distanceMeter)}km</Text>
-                    <Text style={styles.historyDuration}>{formatDurationJa(walk.durationSec)}</Text>
-                  </View>
-                  <Ionicons name="chevron-forward" size={24} color="#CCCCCC" />
-                </TouchableOpacity>
-              </Swipeable>
-            ))}
+                  <TouchableOpacity
+                    style={styles.historyItem}
+                    onPress={() => handleWalkPress(walk)}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.historyInfo}>
+                      <Text style={styles.historyDate}>
+                        {walk.startTime.getMonth() + 1}/{walk.startTime.getDate()} ({['日', '月', '火', '水', '木', '金', '土'][walk.startTime.getDay()]})
+                      </Text>
+                      <Text style={styles.historyTime}>
+                        {walk.startTime.getHours().toString().padStart(2, '0')}:
+                        {walk.startTime.getMinutes().toString().padStart(2, '0')}
+                      </Text>
+                    </View>
+                    <View style={styles.historyStats}>
+                      <Text style={styles.historyDistance}>{formatDistance(walk.distanceMeter)}km</Text>
+                      <Text style={styles.historyDuration}>{formatDurationJa(walk.durationSec)}</Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={24} color="#CCCCCC" />
+                  </TouchableOpacity>
+                </Swipeable>
+              );
+            })}
           </View>
         </ScrollView>
       )}
