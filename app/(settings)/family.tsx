@@ -177,6 +177,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     flex: 1,
+    paddingVertical: 10, 
   },
   memberInfo: {
     flex: 1,
