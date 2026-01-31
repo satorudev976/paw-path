@@ -49,6 +49,20 @@ export default function SubscriptionScreen() {
   const priceString = (pkg?: PurchasesPackage, fallback = '') =>
     pkg?.product?.priceString ?? fallback
 
+  // ✅ 表示用プラン名（Store由来）
+  const planTitle = (pkg?: PurchasesPackage, fallback = '') =>
+    pkg?.product?.title ?? fallback
+
+  const activePlanTitle = (() => {
+    if (activeProductType === 'monthly') {
+      return planTitle(monthlyPkg, '月額プラン')
+    }
+    if (activeProductType === 'annual') {
+      return planTitle(annualPkg, '年額プラン')
+    }
+    return 'プラン確認中'
+  })()
+
   // 購入処理
   const handlePurchase = async (plan: PurchasesPackage) => {
     try {
@@ -177,13 +191,7 @@ export default function SubscriptionScreen() {
             <Ionicons name="checkmark-circle" size={28} color="#50C878" />
             <View style={styles.activeInfo}>
               <Text style={styles.activeTitle}>契約中</Text>
-              <Text style={styles.activeSubtitle}>
-                {activeProductType === 'annual'
-                  ? '年額プラン'
-                  : activeProductType === 'monthly'
-                  ? '月額プラン'
-                  : 'プラン確認中'}
-              </Text>
+              <Text style={styles.activeSubtitle}>{activePlanTitle}</Text>
             </View>
           </View>
         )}
@@ -217,7 +225,7 @@ export default function SubscriptionScreen() {
             >
               <View style={styles.planHeader}>
                 <Ionicons name="diamond-outline" size={24} color="#4A90E2" />
-                <Text style={styles.planName}>月額プラン</Text>
+                <Text style={styles.planName}>{planTitle(monthlyPkg, '月額プラン')}</Text>
               </View>
 
               <Text style={styles.planPrice}>
@@ -247,16 +255,14 @@ export default function SubscriptionScreen() {
               disabled={hasEntitlement}
               activeOpacity={0.8}
             >
-
               <View style={styles.planHeader}>
                 <Ionicons name="star" size={24} color="#FFD700" />
-                <Text style={styles.planName}>年額プラン</Text>
+                <Text style={styles.planName}>{planTitle(annualPkg, '年額プラン')}</Text>
               </View>
 
               <Text style={styles.planPrice}>
                 {priceString(annualPkg, '¥1,000')} <Text style={styles.planPeriod}>/ 年</Text>
               </Text>
-
 
               {!hasEntitlement && (
                 <View style={[styles.planButton, styles.planButtonRecommended]}>
@@ -284,7 +290,11 @@ export default function SubscriptionScreen() {
 
         {/* 復元ボタン */}
         {!hasEntitlement && (
-          <TouchableOpacity style={styles.restoreButton} onPress={handleRestore} disabled={hasEntitlement}>
+          <TouchableOpacity
+            style={styles.restoreButton}
+            onPress={handleRestore}
+            disabled={hasEntitlement}
+          >
             <Text style={styles.restoreButtonText}>購入履歴を復元</Text>
           </TouchableOpacity>
         )}
