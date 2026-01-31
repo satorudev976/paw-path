@@ -1,6 +1,6 @@
 import { getFunctions, httpsCallable } from "firebase/functions"
 
-const functions = getFunctions()
+const functions = getFunctions(undefined, 'asia-northeast1')
 
 export const CloudFunction = {
   async call(name: string, payload: any) {
