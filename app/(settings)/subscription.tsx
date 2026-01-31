@@ -1,6 +1,6 @@
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { Ionicons } from '@expo/vector-icons'
+import { useRouter } from 'expo-router'
+import React, { useEffect, useState } from 'react'
 import {
   ActivityIndicator,
   Alert,
@@ -11,133 +11,123 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from 'react-native';
-import { PurchasesOfferings, PurchasesPackage } from 'react-native-purchases';
-import { useSubscription } from '@/hooks/use-subscription';
-import { useAppAccess } from '@/hooks/use-app-access';
-import { SubscriptionService } from '@/services/subscription.service';
+} from 'react-native'
+import { PurchasesOfferings, PurchasesPackage } from 'react-native-purchases'
+import { useSubscription } from '@/hooks/use-subscription'
+import { useAppAccess } from '@/hooks/use-app-access'
+import { SubscriptionService } from '@/services/subscription.service'
 
 export default function SubscriptionScreen() {
-  const router = useRouter();
-  const [offering, setOffering] = useState<PurchasesOfferings | null>(null);
-  const [isLoadingPlans, setIsLoadingPlans] = useState(true);
+  const router = useRouter()
+  const [offering, setOffering] = useState<PurchasesOfferings | null>(null)
+  const [isLoadingPlans, setIsLoadingPlans] = useState(true)
 
-  const { hasEntitlement, activeProductType, refresh } = useSubscription();
-  const { trialUse, readonly } = useAppAccess();
-
+  const { hasEntitlement, activeProductType, refresh } = useSubscription()
+  const { trialUse, readonly } = useAppAccess()
 
   // プラン取得
   useEffect(() => {
     const loadPlans = async () => {
       try {
-        setIsLoadingPlans(true);
-        const offering = await SubscriptionService.getAvailablePackages();
-        setOffering(offering);
+        setIsLoadingPlans(true)
+        const offering = await SubscriptionService.getAvailablePackages()
+        setOffering(offering)
       } catch (error) {
-        console.error('プラン取得エラー:', error);
-        Alert.alert('エラー', 'プラン情報の取得に失敗しました');
+        console.error('プラン取得エラー:', error)
+        Alert.alert('エラー', 'プラン情報の取得に失敗しました')
       } finally {
-        setIsLoadingPlans(false);
+        setIsLoadingPlans(false)
       }
-    };
-    
-    loadPlans();
-  }, []);
+    }
+
+    loadPlans()
+  }, [])
+
+  const monthlyPkg = offering?.current?.monthly
+  const annualPkg = offering?.current?.annual
+
+  const priceString = (pkg?: PurchasesPackage, fallback = '') =>
+    pkg?.product?.priceString ?? fallback
 
   // 購入処理
   const handlePurchase = async (plan: PurchasesPackage) => {
-
     try {
-      const success = await SubscriptionService.purchasePackage(plan);
-      
+      const success = await SubscriptionService.purchasePackage(plan)
+
       if (success) {
-        // AppStoreのレビューのダイアログ
-        Alert.alert(
-          '購入完了！',
-          'サブスクリプションが有効になりました。',
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                refresh();
-                router.back();
-              },
+        Alert.alert('購入完了！', 'サブスクリプションが有効になりました。', [
+          {
+            text: 'OK',
+            onPress: () => {
+              refresh()
+              router.back()
             },
-          ]
-        );
+          },
+        ])
       } else {
-        Alert.alert('エラー', '購入に失敗しました');
+        Alert.alert('エラー', '購入に失敗しました')
       }
     } catch (error: any) {
-      if (error.message === 'CANCELLED') {
+      if (error?.message === 'CANCELLED') {
         // ユーザーキャンセル - 何もしない
-        return;
+        return
       }
-      console.error('購入エラー:', error);
-      Alert.alert('エラー', '購入処理中にエラーが発生しました');
-    } 
-  };
+      console.error('購入エラー:', error)
+      Alert.alert('エラー', '購入処理中にエラーが発生しました')
+    }
+  }
 
   // 復元処理
   const handleRestore = async () => {
-
     try {
-      
-      const success = await SubscriptionService.restorePurchases();
-      
+      const success = await SubscriptionService.restorePurchases()
+
       if (success) {
-        Alert.alert(
-          '復元完了！',
-          'サブスクリプションが復元されました。',
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                refresh();
-                router.back();
-              },
+        Alert.alert('復元完了！', 'サブスクリプションが復元されました。', [
+          {
+            text: 'OK',
+            onPress: () => {
+              refresh()
+              router.back()
             },
-          ]
-        );
+          },
+        ])
       } else {
-        Alert.alert(
-          '復元失敗',
-          '復元可能なサブスクリプションが見つかりませんでした。'
-        );
+        Alert.alert('復元失敗', '復元可能なサブスクリプションが見つかりませんでした。')
       }
     } catch (error) {
-      console.error('復元エラー:', error);
-      Alert.alert('エラー', '復元処理中にエラーが発生しました');
+      console.error('復元エラー:', error)
+      Alert.alert('エラー', '復元処理中にエラーが発生しました')
     }
-  };
+  }
 
   // サブスク管理画面を開く
   const handleOpenManagement = async () => {
     try {
-      const url = Platform.OS === 'ios'
-        ? 'https://apps.apple.com/account/subscriptions'
-        : 'https://play.google.com/store/account/subscriptions';
-      
-      const supported = await Linking.canOpenURL(url);
-      
+      const url =
+        Platform.OS === 'ios'
+          ? 'https://apps.apple.com/account/subscriptions'
+          : 'https://play.google.com/store/account/subscriptions'
+
+      const supported = await Linking.canOpenURL(url)
+
       if (supported) {
-        await Linking.openURL(url);
+        await Linking.openURL(url)
       } else {
         Alert.alert(
           '開けません',
           'サブスクリプション管理画面を開けませんでした。\n\n' +
-          Platform.select({
-            ios: 'iOSの「設定」アプリ → Apple ID → サブスクリプション から管理できます。',
-            android: 'Google Playストア → メニュー → 定期購入 から管理できます。',
-          })
-        );
+            Platform.select({
+              ios: 'iOSの「設定」アプリ → Apple ID → サブスクリプション から管理できます。',
+              android: 'Google Playストア → メニュー → 定期購入 から管理できます。',
+            })
+        )
       }
     } catch (error) {
-      console.error('サブスク管理画面を開くエラー:', error);
-      Alert.alert('エラー', 'サブスクリプション管理画面を開けませんでした');
+      console.error('サブスク管理画面を開くエラー:', error)
+      Alert.alert('エラー', 'サブスクリプション管理画面を開けませんでした')
     }
-  };
-
+  }
 
   // ローディング中
   if (isLoadingPlans) {
@@ -150,14 +140,15 @@ export default function SubscriptionScreen() {
           <Text style={styles.headerTitle}>サブスクリプション</Text>
           <View style={styles.backButton} />
         </View>
-        
+
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#50C878" />
           <Text style={styles.loadingText}>読み込み中...</Text>
         </View>
       </View>
-    );
+    )
   }
+
   return (
     <View style={styles.container}>
       {/* ヘッダー */}
@@ -176,9 +167,7 @@ export default function SubscriptionScreen() {
             <Ionicons name="gift" size={28} color="#FF9500" />
             <View style={styles.trialInfo}>
               <Text style={styles.trialTitle}>お試し期間中</Text>
-              <Text style={styles.trialSubtitle}>
-                お試し期間は７日間です。
-              </Text>
+              <Text style={styles.trialSubtitle}>お試し期間は７日間です。</Text>
             </View>
           </View>
         )}
@@ -189,7 +178,11 @@ export default function SubscriptionScreen() {
             <View style={styles.activeInfo}>
               <Text style={styles.activeTitle}>契約中</Text>
               <Text style={styles.activeSubtitle}>
-                {offering?.current?.annual ? '年額プラン' : '月額プラン'}
+                {activeProductType === 'annual'
+                  ? '年額プラン'
+                  : activeProductType === 'monthly'
+                  ? '月額プラン'
+                  : 'プラン確認中'}
               </Text>
             </View>
           </View>
@@ -209,17 +202,16 @@ export default function SubscriptionScreen() {
 
         {/* メインメッセージ */}
         <View style={styles.messageSection}>
-          <Text style={styles.mainTitle}>家族みんなで使える！</Text>
-          <Text style={styles.mainSubtitle}>月額100円から</Text>
+          <Text style={styles.mainTitle}>家族みんなが使える！</Text>
         </View>
 
         {/* プランカード */}
         <View style={styles.plansSection}>
           {/* 月額プラン */}
-          {offering?.current?.monthly && (
+          {monthlyPkg && (
             <TouchableOpacity
               style={styles.planCard}
-              onPress={() => offering?.current?.monthly && handlePurchase(offering.current.monthly)}
+              onPress={() => handlePurchase(monthlyPkg)}
               disabled={hasEntitlement}
               activeOpacity={0.8}
             >
@@ -227,27 +219,18 @@ export default function SubscriptionScreen() {
                 <Ionicons name="diamond-outline" size={24} color="#4A90E2" />
                 <Text style={styles.planName}>月額プラン</Text>
               </View>
-              
+
               <Text style={styles.planPrice}>
-                ¥100 <Text style={styles.planPeriod}>/ 月</Text>
+                {priceString(monthlyPkg, '¥100')} <Text style={styles.planPeriod}>/ 月</Text>
               </Text>
-              
-              <View style={styles.planFeatures}>
-                <View style={styles.planFeature}>
-                  <Ionicons name="refresh-outline" size={16} color="#666666" />
-                  <Text style={styles.planFeatureText}>1ヶ月ごとに更新</Text>
-                </View>
-              </View>
-              
+
               {!hasEntitlement && (
                 <View style={styles.planButton}>
-                  <Text style={styles.planButtonText}>
-                    {hasEntitlement ? '処理中...' : '選択する'}
-                  </Text>
+                  <Text style={styles.planButtonText}>選択する</Text>
                 </View>
               )}
-              
-             {hasEntitlement && activeProductType === 'monthly' && (
+
+              {hasEntitlement && activeProductType === 'monthly' && (
                 <View style={styles.currentPlanBadge}>
                   <Ionicons name="checkmark-circle" size={16} color="#50C878" />
                   <Text style={styles.currentPlanText}>現在のプラン</Text>
@@ -257,41 +240,30 @@ export default function SubscriptionScreen() {
           )}
 
           {/* 年額プラン */}
-          {offering?.current?.annual && (
+          {annualPkg && (
             <TouchableOpacity
               style={[styles.planCard, styles.planCardRecommended]}
-              onPress={() => offering?.current?.annual && handlePurchase(offering.current.annual)}
+              onPress={() => handlePurchase(annualPkg)}
               disabled={hasEntitlement}
               activeOpacity={0.8}
             >
-              <View style={styles.recommendedBadge}>
-                <Text style={styles.recommendedText}>2ヶ月分お得！</Text>
-              </View>
-              
+
               <View style={styles.planHeader}>
                 <Ionicons name="star" size={24} color="#FFD700" />
                 <Text style={styles.planName}>年額プラン</Text>
               </View>
-              
+
               <Text style={styles.planPrice}>
-                ¥1,000 <Text style={styles.planPeriod}>/ 年</Text>
+                {priceString(annualPkg, '¥1,000')} <Text style={styles.planPeriod}>/ 年</Text>
               </Text>
-              
-              <View style={styles.planFeatures}>
-                <View style={styles.planFeature}>
-                  <Ionicons name="trending-down-outline" size={16} color="#666666" />
-                  <Text style={styles.planFeatureText}>実質月額83円</Text>
-                </View>
-              </View>
-              
+
+
               {!hasEntitlement && (
                 <View style={[styles.planButton, styles.planButtonRecommended]}>
-                  <Text style={styles.planButtonText}>
-                    {hasEntitlement ? '処理中...' : '選択する'}
-                  </Text>
+                  <Text style={styles.planButtonText}>選択する</Text>
                 </View>
               )}
-              
+
               {hasEntitlement && activeProductType === 'annual' && (
                 <View style={styles.currentPlanBadge}>
                   <Ionicons name="checkmark-circle" size={16} color="#50C878" />
@@ -304,10 +276,7 @@ export default function SubscriptionScreen() {
 
         {/* サブスク管理ボタン */}
         {hasEntitlement && (
-          <TouchableOpacity
-            style={styles.managementButton}
-            onPress={handleOpenManagement}
-          >
+          <TouchableOpacity style={styles.managementButton} onPress={handleOpenManagement}>
             <Text style={styles.managementButtonText}>サブスクリプション管理</Text>
             <Ionicons name="chevron-forward" size={20} color="#4A90E2" />
           </TouchableOpacity>
@@ -315,14 +284,8 @@ export default function SubscriptionScreen() {
 
         {/* 復元ボタン */}
         {!hasEntitlement && (
-          <TouchableOpacity
-            style={styles.restoreButton}
-            onPress={handleRestore}
-            disabled={hasEntitlement}
-          >
-            <Text style={styles.restoreButtonText}>
-              購入履歴を復元
-            </Text>
+          <TouchableOpacity style={styles.restoreButton} onPress={handleRestore} disabled={hasEntitlement}>
+            <Text style={styles.restoreButtonText}>購入履歴を復元</Text>
           </TouchableOpacity>
         )}
 
@@ -336,7 +299,7 @@ export default function SubscriptionScreen() {
         </View>
       </ScrollView>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -604,4 +567,4 @@ const styles = StyleSheet.create({
     color: '#666666',
     lineHeight: 20,
   },
-});
+})
