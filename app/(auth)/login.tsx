@@ -81,19 +81,37 @@ export default function LoginScreen() {
   }
 
   const handleAppleSignIn = async () => {
-    const result = await AppleAuthentication.signInAsync({
-      requestedScopes: [
-        AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-        AppleAuthentication.AppleAuthenticationScope.EMAIL,
-      ],
-    })
-    const idToken = result.identityToken
-      if (idToken) {
-        await AuthService.login({
-          provider: 'apple',
-          idToken: idToken
-        });
+    try {
+      const result = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      })
+  
+      const idToken = result.identityToken
+      if (!idToken) {
+        console.warn('Apple sign-in succeeded but identityToken is missing')
+        return
       }
+  
+      await AuthService.login({
+        provider: 'apple',
+        idToken,
+      })
+    } catch (e: any) {
+      // ユーザーが閉じた/キャンセルしただけ
+      if (
+        e?.code === 'ERR_REQUEST_CANCELED' ||
+        e?.code === 'ERR_CANCELED' ||
+        /canceled/i.test(String(e?.message))
+      ) {
+        return
+      }
+  
+      console.error('Apple sign-in failed:', e)
+      Alert.alert('Appleログインに失敗しました')
+    }
   }
 
 
