@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import React, { useState, useEffect } from 'react';
 import {
   ActivityIndicator,
@@ -12,6 +12,8 @@ import {
   View,
 } from 'react-native';
 import { setUpOwnerService } from '@/services/setup-owner.service';
+import { InviteAcceptService } from '@/services/invite-accespt.service';
+import { InviteService } from '@/services/invite.service';
 import { useAuth } from '@/hooks/use-auth';
 import { useUser } from '@/hooks/use-user';
 import { NicknameErrorCode, NicknameErrorCodes } from '@/domain/profile/nickname.errors';
@@ -21,6 +23,7 @@ export default function NicknameScreen() {
   const router = useRouter();
   const { authUser } = useAuth();
   const { user, refresh } = useUser();
+  const { token } = useLocalSearchParams<{ token?: string }>();
   
   const [nickname, setNickname] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -43,26 +46,41 @@ export default function NicknameScreen() {
   }
 
   const handleSetUp = async () => {
-
     setIsLoading(true);
 
     const result = UserProfileService.validateNickname(nickname.trim());
     if (!result.ok) {
       Alert.alert('入力エラー', nicknameErrorMessage(result.error.code));
+      setIsLoading(false);
       return;
     }
     
     try {
-      await setUpOwnerService.setUp(authUser!.uid, nickname.trim());
-      refresh();
+      // tokenがある場合は招待経由、ない場合は新規オーナー
+      if (token && typeof token === 'string') {
+        // 招待経由の場合
+        const invite = await InviteService.getInvite(token);
+        if (!invite) {
+          Alert.alert('エラー', '招待が見つかりません');
+          setIsLoading(false);
+          return;
+        }
+        
+        await InviteAcceptService.joinFamily(invite, authUser!.uid, nickname.trim());
+      } else {
+        // 新規オーナーの場合
+        await setUpOwnerService.setUp(authUser!.uid, nickname.trim());
+      }
+      
+      await refresh();
+      router.replace('/(tabs)');
     } catch (error: any) {
       console.error('セットアップエラー:', error);
+      Alert.alert('エラー', 'セットアップに失敗しました');
     } finally {
       setIsLoading(false);
     }
   };
-
-
 
   return (
     <KeyboardAvoidingView
