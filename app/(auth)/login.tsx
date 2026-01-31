@@ -172,9 +172,23 @@ export default function LoginScreen() {
           </View>
         </View>
 
-        <Text style={styles.termsText}>
-          続行することで、利用規約とプライバシーポリシーに同意したものとみなされます
-        </Text>
+        {/* ステップ2: 招待 */}
+        <View style={styles.stepContainer}>
+          <View style={styles.stepHeader}>
+            <View style={styles.stepDivider} />
+            <Text style={styles.stepLabel}>家族から招待された方</Text>
+            <View style={styles.stepDivider} />
+          </View>
+
+          {/* 招待リンク案内 */}
+          <View style={styles.inviteInfo}>
+          <Text style={styles.inviteTitle}>👨‍👩‍👧‍👦 家族から招待されましたか?</Text>
+            <Text style={styles.inviteText}>
+              家族から招待リンクを送られた方は{'\n'}
+            招待リンクから参加できます
+            </Text>
+          </View>
+        </View>
 
       </View>
     </SafeAreaView>
@@ -274,12 +288,28 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FFFFFF',
   },
-  termsText: {
-    marginTop: 40,
-    fontSize: 12,
-    color: '#999999',
+  inviteInfo: {
+    width: '100%',
+    backgroundColor: '#FFFFFF',
+    padding: 24,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  inviteTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333333',
+    marginBottom: 12,
     textAlign: 'center',
-    paddingHorizontal: 40,
-    lineHeight: 18,
+  },
+  inviteText: {
+    fontSize: 14,
+    color: '#666666',
+    textAlign: 'center',
+    lineHeight: 20,
   },
 });
