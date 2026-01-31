@@ -6,7 +6,5 @@ export interface Invite {
   createdBy: string
   createdAt: Timestamp
   expiresAt: Timestamp
-  maxUses: number
-  usedCount: number
   isActive: boolean
 }
