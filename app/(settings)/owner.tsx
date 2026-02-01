@@ -77,33 +77,6 @@ export default function OwnwerSettingsScreen() {
     router.push('/user-profile');
   };
 
-  // 🆕 サブスクリプション管理画面を開く
-  const handleOpenSubscriptionManagement = async () => {
-    try {
-      const url = Platform.OS === 'ios'
-        ? 'https://apps.apple.com/account/subscriptions'
-        : 'https://play.google.com/store/account/subscriptions';
-      
-      const supported = await Linking.canOpenURL(url);
-      
-      if (supported) {
-        await Linking.openURL(url);
-      } else {
-        Alert.alert(
-          '開けません',
-          'サブスクリプション管理画面を開けませんでした。\n\n' +
-          Platform.select({
-            ios: 'iOSの「設定」アプリ → Apple ID → サブスクリプション から管理できます。',
-            android: 'Google Playストア → メニュー → 定期購入 から管理できます。',
-          })
-        );
-      }
-    } catch (error) {
-      console.error('サブスク管理画面を開くエラー:', error);
-      Alert.alert('エラー', 'サブスクリプション管理画面を開けませんでした');
-    }
-  };
-
   return (
     <ScrollView style={styles.container}>
       {/* 🆕 サブスクリプション情報 */}
