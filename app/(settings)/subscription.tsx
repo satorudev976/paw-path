@@ -252,7 +252,7 @@ export default function SubscriptionScreen() {
           {/* 年額プラン */}
           {annualPkg && (
             <TouchableOpacity
-              style={[styles.planCard, styles.planCardRecommended]}
+              style={[styles.planCard]}
               onPress={() => handlePurchase(annualPkg)}
               disabled={hasEntitlement}
               activeOpacity={0.8}
@@ -460,10 +460,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
-  },
-  planCardRecommended: {
-    borderColor: '#FFD700',
-    borderWidth: 3,
   },
   recommendedBadge: {
     position: 'absolute',
