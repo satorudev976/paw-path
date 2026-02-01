@@ -7,13 +7,14 @@ import { useRouter } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { Animated, Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useLocationPermission } from '@/hooks/location-permission';
+import { TrialUseBanner } from '@/components/ui/trial-use-banner';
 
 interface IdleStateProps {
   showToast: (message: string, type: 'success' | 'error' | 'info') => void;
 }
 
 export default function IdleState({ showToast }: IdleStateProps) {
-  const { readonly } = useAppAccess();
+  const { readonly, trialUse } = useAppAccess();
   const { startRecording } = useWalkRecording();
   const router = useRouter();
   const { canGps } = useLocationPermission();
@@ -93,6 +94,10 @@ export default function IdleState({ showToast }: IdleStateProps) {
       <ReadOnlyBanner
         visible={readonly}
         onPressUpgrade={() => router.push('/')}
+      />
+      {/* お試し期間中バナー */}
+      <TrialUseBanner
+        visible={trialUse}
       />
       
       <View style={styles.centerContent}>
