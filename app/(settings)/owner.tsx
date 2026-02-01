@@ -118,7 +118,7 @@ export default function OwnwerSettingsScreen() {
                     <Ionicons 
                       name={
                         trialUse ? 'time': 
-                        readonly ? 'eye-outline' : 'checkmark-circle'
+                        readonly ? 'eye-outline' : 'card-outline'
                       } 
                       size={24} 
                       color={
@@ -130,7 +130,7 @@ export default function OwnwerSettingsScreen() {
                     <Text style={styles.subscriptionPlan}>
                       {trialUse ? 'アプリお試し期間中' : 
                       readonly ? '閲覧専用モード' : 
-                      'プロプラン'}
+                      'サブスクリプション管理'}
                     </Text>
                   </View>
                   <Ionicons name="chevron-forward" size={20} color="#CCCCCC" />
@@ -261,18 +261,6 @@ export default function OwnwerSettingsScreen() {
       {/* アプリについて */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>アプリについて</Text>
-        
-        {/* 🆕 サブスクリプション管理（契約中のみ表示） */}
-        {!readonly && !trialUse && (
-          <TouchableOpacity 
-            style={styles.aboutLink}
-            onPress={handleOpenSubscriptionManagement}
-          >
-            <Ionicons name="card-outline" size={24} color="#666666" />
-            <Text style={styles.aboutLinkText}>サブスクリプション管理</Text>
-            <Ionicons name="open-outline" size={20} color="#CCCCCC" />
-          </TouchableOpacity>
-        )}
         
         <TouchableOpacity 
           style={styles.aboutLink}
