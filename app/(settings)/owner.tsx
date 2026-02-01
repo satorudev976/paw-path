@@ -116,22 +116,10 @@ export default function OwnwerSettingsScreen() {
                 <View style={styles.subscriptionHeader}>
                   <View style={styles.subscriptionStatus}>
                     <Ionicons 
-                      name={
-                        trialUse ? 'time': 
-                        readonly ? 'eye-outline' : 'card-outline'
-                      } 
+                      name={'card-outline'} 
                       size={24} 
-                      color={
-                        trialUse ? '#999999' : 
-                        readonly ? '#FF9500' : '#50C878'
-                        
-                      } 
                     />
-                    <Text style={styles.subscriptionPlan}>
-                      {trialUse ? 'アプリお試し期間中' : 
-                      readonly ? '閲覧専用モード' : 
-                      'サブスクリプション管理'}
-                    </Text>
+                    <Text style={styles.subscriptionPlan}> サブスクリプション管理 </Text>
                   </View>
                   <Ionicons name="chevron-forward" size={20} color="#CCCCCC" />
                 </View>
@@ -141,7 +129,7 @@ export default function OwnwerSettingsScreen() {
                   <View style={styles.trialBadge}>
                     <Ionicons name="time-outline" size={16} color="#FF9500" />
                     <Text style={styles.trialText}>
-                      お試し期間は７日間です。
+                      現在は７日間のアプリお試し期間中です。
                     </Text>
                   </View>
                 )}
